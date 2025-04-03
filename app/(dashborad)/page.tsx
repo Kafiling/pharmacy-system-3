@@ -1,8 +1,14 @@
-import { Card } from "@/components/ui/card"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { AlertTriangle, FileText, PillIcon, ShoppingCart, Truck } from "lucide-react"
-import Link from "next/link"
+import { Card } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  AlertTriangle,
+  FileText,
+  PillIcon,
+  ShoppingCart,
+  Truck,
+} from "lucide-react";
+import Link from "next/link";
 
 export default function Dashboard() {
   return (
@@ -14,7 +20,9 @@ export default function Dashboard() {
 
       <Alert className="bg-amber-50 border-amber-200 text-amber-800">
         <AlertTriangle className="h-4 w-4 text-amber-800" />
-        <AlertTitle className="text-amber-800 font-medium">Low Stock Alert</AlertTitle>
+        <AlertTitle className="text-amber-800 font-medium">
+          Low Stock Alert
+        </AlertTitle>
         <AlertDescription className="text-amber-700">
           4 medications are running low on stock.{" "}
           <Link href="/inventory" className="text-pharma-600 font-medium">
@@ -27,7 +35,9 @@ export default function Dashboard() {
         <Card className="stat-card">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Total Medications</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                Total Medications
+              </p>
               <h3 className="text-2xl font-bold mt-1">5</h3>
             </div>
             <div className="stat-icon bg-blue-100">
@@ -36,14 +46,18 @@ export default function Dashboard() {
           </div>
           <div className="mt-2">
             <span className="text-xs text-green-600">↑ 3.2% </span>
-            <span className="text-xs text-muted-foreground">from last month</span>
+            <span className="text-xs text-muted-foreground">
+              from last month
+            </span>
           </div>
         </Card>
 
         <Card className="stat-card">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Today's Orders</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                Today's Orders
+              </p>
               <h3 className="text-2xl font-bold mt-1">4</h3>
             </div>
             <div className="stat-icon bg-green-100">
@@ -52,14 +66,18 @@ export default function Dashboard() {
           </div>
           <div className="mt-2">
             <span className="text-xs text-green-600">↑ 12% </span>
-            <span className="text-xs text-muted-foreground">from yesterday</span>
+            <span className="text-xs text-muted-foreground">
+              from yesterday
+            </span>
           </div>
         </Card>
 
         <Card className="stat-card">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Low Stock Items</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                Low Stock Items
+              </p>
               <h3 className="text-2xl font-bold mt-1">4</h3>
             </div>
             <div className="stat-icon bg-red-100">
@@ -68,18 +86,27 @@ export default function Dashboard() {
           </div>
           <div className="mt-2">
             <span className="text-xs text-red-600">↑ 2 </span>
-            <span className="text-xs text-muted-foreground">more than yesterday</span>
+            <span className="text-xs text-muted-foreground">
+              more than yesterday
+            </span>
           </div>
         </Card>
 
         <Card className="stat-card">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Revenue (Today)</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                Revenue (Today)
+              </p>
               <h3 className="text-2xl font-bold mt-1">$463.45</h3>
             </div>
             <div className="stat-icon bg-purple-100">
-              <svg className="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg
+                className="h-5 w-5 text-purple-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -91,7 +118,9 @@ export default function Dashboard() {
           </div>
           <div className="mt-2">
             <span className="text-xs text-green-600">↑ 8.1% </span>
-            <span className="text-xs text-muted-foreground">from yesterday</span>
+            <span className="text-xs text-muted-foreground">
+              from yesterday
+            </span>
           </div>
         </Card>
       </div>
@@ -117,40 +146,64 @@ export default function Dashboard() {
               </thead>
               <tbody>
                 <tr className="border-b">
-                  <td className="px-4 py-3 text-sm text-pharma-600">ORD-5392</td>
+                  <td className="px-4 py-3 text-sm text-pharma-600">
+                    ORD-5392
+                  </td>
                   <td className="px-4 py-3 text-sm">Unknown</td>
                   <td className="px-4 py-3 text-sm">
-                    <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Completed</span>
+                    <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                      Completed
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-sm">$125.00</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">10:07 PM</td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">
+                    10:07 PM
+                  </td>
                 </tr>
                 <tr className="border-b">
-                  <td className="px-4 py-3 text-sm text-pharma-600">ORD-5391</td>
+                  <td className="px-4 py-3 text-sm text-pharma-600">
+                    ORD-5391
+                  </td>
                   <td className="px-4 py-3 text-sm">Unknown</td>
                   <td className="px-4 py-3 text-sm">
-                    <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Processing</span>
+                    <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                      Processing
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-sm">$78.50</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">10:07 PM</td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">
+                    10:07 PM
+                  </td>
                 </tr>
                 <tr className="border-b">
-                  <td className="px-4 py-3 text-sm text-pharma-600">ORD-5390</td>
+                  <td className="px-4 py-3 text-sm text-pharma-600">
+                    ORD-5390
+                  </td>
                   <td className="px-4 py-3 text-sm">Unknown</td>
                   <td className="px-4 py-3 text-sm">
-                    <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Completed</span>
+                    <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                      Completed
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-sm">$214.75</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">10:07 PM</td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">
+                    10:07 PM
+                  </td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-3 text-sm text-pharma-600">ORD-5389</td>
+                  <td className="px-4 py-3 text-sm text-pharma-600">
+                    ORD-5389
+                  </td>
                   <td className="px-4 py-3 text-sm">Unknown</td>
                   <td className="px-4 py-3 text-sm">
-                    <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                    <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+                      Pending
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-sm">$45.20</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">10:07 PM</td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">
+                    10:07 PM
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -160,7 +213,11 @@ export default function Dashboard() {
         <Card className="overflow-hidden">
           <div className="p-4 flex justify-between items-center border-b">
             <h3 className="font-medium">Low Stock Medications</h3>
-            <Button variant="outline" size="sm" className="text-pharma-600 border-pharma-600 hover:bg-pharma-50">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-pharma-600 border-pharma-600 hover:bg-pharma-50"
+            >
               Place Order
             </Button>
           </div>
@@ -184,13 +241,17 @@ export default function Dashboard() {
                       </div>
                       <div>
                         <div className="font-medium text-sm">Amoxicillin</div>
-                        <div className="text-xs text-muted-foreground">500mg</div>
+                        <div className="text-xs text-muted-foreground">
+                          500mg
+                        </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-sm">
                     <div>10 boxes</div>
-                    <div className="text-xs text-muted-foreground">Min: 20 boxes</div>
+                    <div className="text-xs text-muted-foreground">
+                      Min: 20 boxes
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <span className="badge-critical">Critical</span>
@@ -214,13 +275,17 @@ export default function Dashboard() {
                       </div>
                       <div>
                         <div className="font-medium text-sm">Lisinopril</div>
-                        <div className="text-xs text-muted-foreground">10mg</div>
+                        <div className="text-xs text-muted-foreground">
+                          10mg
+                        </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-sm">
                     <div>8 bottles</div>
-                    <div className="text-xs text-muted-foreground">Min: 15 bottles</div>
+                    <div className="text-xs text-muted-foreground">
+                      Min: 15 bottles
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <span className="badge-low">Low</span>
@@ -244,13 +309,17 @@ export default function Dashboard() {
                       </div>
                       <div>
                         <div className="font-medium text-sm">Atorvastatin</div>
-                        <div className="text-xs text-muted-foreground">20mg</div>
+                        <div className="text-xs text-muted-foreground">
+                          20mg
+                        </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-sm">
                     <div>12 boxes</div>
-                    <div className="text-xs text-muted-foreground">Min: 25 boxes</div>
+                    <div className="text-xs text-muted-foreground">
+                      Min: 25 boxes
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <span className="badge-critical">Critical</span>
@@ -274,13 +343,17 @@ export default function Dashboard() {
                       </div>
                       <div>
                         <div className="font-medium text-sm">Metformin</div>
-                        <div className="text-xs text-muted-foreground">850mg</div>
+                        <div className="text-xs text-muted-foreground">
+                          850mg
+                        </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-sm">
                     <div>15 bottles</div>
-                    <div className="text-xs text-muted-foreground">Min: 30 bottles</div>
+                    <div className="text-xs text-muted-foreground">
+                      Min: 30 bottles
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <span className="badge-critical">Critical</span>
@@ -306,7 +379,11 @@ export default function Dashboard() {
         <div className="p-4 flex justify-between items-center border-b">
           <h3 className="font-medium">Sales Overview</h3>
           <div className="flex space-x-2">
-            <Button variant="outline" size="sm" className="bg-pharma-600 text-white hover:bg-pharma-700">
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-pharma-600 text-white hover:bg-pharma-700"
+            >
               Weekly
             </Button>
             <Button variant="outline" size="sm">
@@ -322,31 +399,52 @@ export default function Dashboard() {
             {/* This would be a chart component in a real implementation */}
             <div className="flex items-end justify-between h-48 w-full px-2">
               <div className="w-1/7 flex flex-col items-center">
-                <div className="w-12 bg-pharma-500 rounded-t-sm" style={{ height: "60%" }}></div>
+                <div
+                  className="w-12 bg-pharma-500 rounded-t-sm"
+                  style={{ height: "60%" }}
+                ></div>
                 <span className="text-xs mt-2">Mon</span>
               </div>
               <div className="w-1/7 flex flex-col items-center">
-                <div className="w-12 bg-pharma-500 rounded-t-sm" style={{ height: "45%" }}></div>
+                <div
+                  className="w-12 bg-pharma-500 rounded-t-sm"
+                  style={{ height: "45%" }}
+                ></div>
                 <span className="text-xs mt-2">Tue</span>
               </div>
               <div className="w-1/7 flex flex-col items-center">
-                <div className="w-12 bg-pharma-500 rounded-t-sm" style={{ height: "75%" }}></div>
+                <div
+                  className="w-12 bg-pharma-500 rounded-t-sm"
+                  style={{ height: "75%" }}
+                ></div>
                 <span className="text-xs mt-2">Wed</span>
               </div>
               <div className="w-1/7 flex flex-col items-center">
-                <div className="w-12 bg-pharma-500 rounded-t-sm" style={{ height: "40%" }}></div>
+                <div
+                  className="w-12 bg-pharma-500 rounded-t-sm"
+                  style={{ height: "40%" }}
+                ></div>
                 <span className="text-xs mt-2">Thu</span>
               </div>
               <div className="w-1/7 flex flex-col items-center">
-                <div className="w-12 bg-pharma-500 rounded-t-sm" style={{ height: "80%" }}></div>
+                <div
+                  className="w-12 bg-pharma-500 rounded-t-sm"
+                  style={{ height: "80%" }}
+                ></div>
                 <span className="text-xs mt-2">Fri</span>
               </div>
               <div className="w-1/7 flex flex-col items-center">
-                <div className="w-12 bg-pharma-500 rounded-t-sm" style={{ height: "50%" }}></div>
+                <div
+                  className="w-12 bg-pharma-500 rounded-t-sm"
+                  style={{ height: "50%" }}
+                ></div>
                 <span className="text-xs mt-2">Sat</span>
               </div>
               <div className="w-1/7 flex flex-col items-center">
-                <div className="w-12 bg-pharma-500 rounded-t-sm" style={{ height: "35%" }}></div>
+                <div
+                  className="w-12 bg-pharma-500 rounded-t-sm"
+                  style={{ height: "35%" }}
+                ></div>
                 <span className="text-xs mt-2">Sun</span>
               </div>
             </div>
@@ -378,7 +476,9 @@ export default function Dashboard() {
             <ShoppingCart className="h-6 w-6 text-blue-600" />
           </div>
           <h3 className="font-medium mb-1">New Order</h3>
-          <p className="text-sm text-muted-foreground mb-4">Create a new customer order</p>
+          <p className="text-sm text-muted-foreground mb-4">
+            Create a new customer order
+          </p>
           <Button variant="outline" className="w-full">
             Create
           </Button>
@@ -389,7 +489,9 @@ export default function Dashboard() {
             <PillIcon className="h-6 w-6 text-green-600" />
           </div>
           <h3 className="font-medium mb-1">Add Medication</h3>
-          <p className="text-sm text-muted-foreground mb-4">Add new medication to inventory</p>
+          <p className="text-sm text-muted-foreground mb-4">
+            Add new medication to inventory
+          </p>
           <Button variant="outline" className="w-full">
             Add
           </Button>
@@ -400,7 +502,9 @@ export default function Dashboard() {
             <Truck className="h-6 w-6 text-purple-600" />
           </div>
           <h3 className="font-medium mb-1">Order Supplies</h3>
-          <p className="text-sm text-muted-foreground mb-4">Place orders with suppliers</p>
+          <p className="text-sm text-muted-foreground mb-4">
+            Place orders with suppliers
+          </p>
           <Button variant="outline" className="w-full">
             Order
           </Button>
@@ -411,13 +515,14 @@ export default function Dashboard() {
             <FileText className="h-6 w-6 text-amber-600" />
           </div>
           <h3 className="font-medium mb-1">Generate Report</h3>
-          <p className="text-sm text-muted-foreground mb-4">Create inventory and sales reports</p>
+          <p className="text-sm text-muted-foreground mb-4">
+            Create inventory and sales reports
+          </p>
           <Button variant="outline" className="w-full">
             Generate
           </Button>
         </Card>
       </div>
     </div>
-  )
+  );
 }
-
