@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import { getAllStock } from "@/actions/stock";
-import { MyDocument } from "@/Documents/Prescription";
+import { MyDocument } from "@/Documents/MedicieneLabel";
 import { PDFViewer } from "@react-pdf/renderer";
+
 export default function Page() {
   const [isClient, setIsClient] = useState(false);
 
