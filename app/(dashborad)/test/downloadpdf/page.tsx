@@ -1,33 +1,35 @@
 "use client";
-
+import { useEffect, useState } from "react";
 import { getAllStock } from "@/actions/stock";
-import { useEffect } from "react";
-
+import { MyDocument } from "@/Documents/Prescription";
+import { PDFViewer } from "@react-pdf/renderer";
 export default function Page() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    // Ensure this code runs only on the client side
+    setIsClient(true);
+  }, []);
+
+  /* This Download "EXPORTED" PDF file from the server side
   useEffect(() => {
     // Trigger the file download on the client side
     const link = document.createElement("a");
     link.href = "/example.pdf"; // Adjust the path to your generated PDF
-    link.download = "_Health_claim.pdf";
+    link.download = "ORDERDETAIL_Presciption.pdf"; // Set the desired file name
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   }, []); // Runs only once after the component mounts
-
-  const stock = [
-    // Mock data for demonstration
-    { stock_id: 1, name: "Item A", supplier_id: "Supplier A" },
-    { stock_id: 2, name: "Item B", supplier_id: "Supplier B" },
-  ];
+*/
 
   return (
-    <div>
-      {stock.map((item: any) => (
-        <div key={item.stock_id}>
-          <h2>{item.name}</h2>
-          <p>supplier_id: {item.supplier_id}</p>
-        </div>
-      ))}
+    <div style={{ height: "100vh", width: "100%" }}>
+      {isClient && (
+        <PDFViewer style={{ height: "100%", width: "100%" }}>
+          <MyDocument />
+        </PDFViewer>
+      )}
     </div>
   );
 }

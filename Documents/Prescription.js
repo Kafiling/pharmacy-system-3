@@ -28,4 +28,4 @@ export const MyDocument = () => (
   </Document>
 );
 
-ReactPDF.render(<MyDocument />, `${__dirname}/example.pdf`);
+//rendering the pdf is handled in the api/render/route.js
