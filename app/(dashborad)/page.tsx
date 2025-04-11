@@ -148,9 +148,7 @@ export default async function Dashboard() {
               </thead>
               <tbody>
                 <tr className="border-b">
-                  <td className="px-4 py-3 text-sm text-pharma-600">
-                    ORD-5392
-                  </td>
+                  <td className="px-4 py-3 text-sm text-pharma-600">TESTING</td>
                   <td className="px-4 py-3 text-sm">Unknown</td>
                   <td className="px-4 py-3 text-sm">
                     <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
@@ -162,43 +160,17 @@ export default async function Dashboard() {
                     10:07 PM
                   </td>
                 </tr>
+
                 <tr className="border-b">
-                  <td className="px-4 py-3 text-sm text-pharma-600">
-                    ORD-5391
-                  </td>
-                  <td className="px-4 py-3 text-sm">Unknown</td>
-                  <td className="px-4 py-3 text-sm">
-                    <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                      Processing
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm">$78.50</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">
-                    10:07 PM
-                  </td>
-                </tr>
-                <tr className="border-b">
-                  <td className="px-4 py-3 text-sm text-pharma-600">
-                    ORD-5390
-                  </td>
-                  <td className="px-4 py-3 text-sm">Unknown</td>
-                  <td className="px-4 py-3 text-sm">
-                    <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-                      Completed
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm">$214.75</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">
-                    10:07 PM
-                  </td>
-                </tr>
-                <div>
                   {order.map((order: any) => (
-                    <div key={order.order_id}>
-                      <h2>{order.customer_id}</h2>
-                    </div>
+                    <td
+                      key={order.order_id}
+                      className="px-4 py-3 text-sm text-pharma-600"
+                    >
+                      {order.order_id}
+                    </td>
                   ))}
-                </div>
+                </tr>
               </tbody>
             </table>
           </div>
