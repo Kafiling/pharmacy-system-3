@@ -12,19 +12,22 @@ export async function getRecentOrder() {
     .from("order")
     .select(
       "order_id, employee_id, order_date, total_price, customers(firstname, lastname)"
-    );
+    )
+    .order("order_date", { ascending: false })
+    .limit(6);
   console.log("Data:", data);
   console.log("Error:", error);
   return data;
 }
 
 export async function getLowStock() {
-  // Fetch 10 most recent orders
   const { data, error } = await supabase
     .from("stock")
-    .select()
-    .lt("quantity", 50);
+    .select(
+      "stock_id, quantity_in_stock, medicine(medicine_name, categories_id), supplier(supplier_id, supplier_name)"
+    )
+    .lt("quantity_in_stock", 50);
   console.log("Low Stock Data:", data);
-  console.log("Low Stock Data:", error);
+  console.log("Low Stock Error:", error);
   return data;
 }

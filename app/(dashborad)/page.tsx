@@ -186,46 +186,12 @@ export default async function Dashboard() {
                 <tr className="text-xs text-left text-muted-foreground bg-muted/50">
                   <th className="px-4 py-3 font-medium">Name</th>
                   <th className="px-4 py-3 font-medium">Stock</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium">Supplier ID</th>
                   <th className="px-4 py-3 font-medium">Supplier</th>
                   <th className="px-4 py-3 font-medium">Action</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center">
-                      <div className="h-8 w-8 flex items-center justify-center bg-blue-100 rounded-md mr-2">
-                        <PillIcon className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="font-medium text-sm">Metformin</div>
-                        <div className="text-xs text-muted-foreground">
-                          850mg
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <div>15 bottles</div>
-                    <div className="text-xs text-muted-foreground">
-                      Min: 30 bottles
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="badge-critical">Critical</span>
-                  </td>
-                  <td className="px-4 py-3 text-sm">Unknown</td>
-                  <td className="px-4 py-3 text-sm">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-pharma-600 hover:text-pharma-700 hover:bg-pharma-50"
-                    >
-                      Order
-                    </Button>
-                  </td>
-                </tr>
                 {stock.map((stock: any) => (
                   <tr key={stock.stock_id} className="border-b">
                     <td className="px-4 py-3">
@@ -245,9 +211,21 @@ export default async function Dashboard() {
                     </td>
                     <td className="px-4 py-3 text-sm">
                       <div>{stock.quantity_in_stock} units</div>
-                      <div className="text-xs text-muted-foreground">
-                        Min: 30 bottles
-                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      {stock.supplier.supplier_id}
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      {stock.supplier.supplier_name}
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-pharma-600 hover:text-pharma-700 hover:bg-pharma-50"
+                      >
+                        Order
+                      </Button>
                     </td>
                   </tr>
                 ))}
