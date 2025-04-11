@@ -141,8 +141,8 @@ export default async function Dashboard() {
                 <tr className="text-xs text-left text-muted-foreground bg-muted/50">
                   <th className="px-4 py-3 font-medium">Order ID</th>
                   <th className="px-4 py-3 font-medium">Customer</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium">Amount</th>
+                  <th className="px-4 py-3 font-medium">Employee</th>
+                  <th className="px-4 py-3 font-medium">Price</th>
                   <th className="px-4 py-3 font-medium">Time</th>
                 </tr>
               </thead>
@@ -161,16 +161,19 @@ export default async function Dashboard() {
                   </td>
                 </tr>
 
-                <tr className="border-b">
-                  {order.map((order: any) => (
-                    <td
-                      key={order.order_id}
-                      className="px-4 py-3 text-sm text-pharma-600"
-                    >
+                {order.map((order: any) => (
+                  <tr key={order.order_id} className="border-b">
+                    <td className="px-4 py-3 text-sm text-pharma-600">
                       {order.order_id}
                     </td>
-                  ))}
-                </tr>
+                    <td className="px-4 py-3 text-sm">
+                      {order.customers.firstname} {order.customers.lastname}
+                    </td>
+                    <td className="px-4 py-3 text-sm">{order.employee_id}</td>
+                    <td className="px-4 py-3 text-sm">฿{order.total_price.toFixed(2)}</td>
+                    <td className="px-4 py-3 text-sm">{order.order_date}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
