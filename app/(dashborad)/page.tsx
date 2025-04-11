@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { getRecentOrder } from "@/actions/dashboard";
 import {
   AlertTriangle,
   FileText,
@@ -10,7 +11,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-export default function Dashboard() {
+export default async function Dashboard() {
+  const order = (await getRecentOrder()) || [];
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
@@ -190,21 +192,13 @@ export default function Dashboard() {
                     10:07 PM
                   </td>
                 </tr>
-                <tr>
-                  <td className="px-4 py-3 text-sm text-pharma-600">
-                    ORD-5389
-                  </td>
-                  <td className="px-4 py-3 text-sm">Unknown</td>
-                  <td className="px-4 py-3 text-sm">
-                    <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
-                      Pending
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm">$45.20</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">
-                    10:07 PM
-                  </td>
-                </tr>
+                <div>
+                  {order.map((order: any) => (
+                    <div key={order.order_id}>
+                      <h2>{order.customer_id}</h2>
+                    </div>
+                  ))}
+                </div>
               </tbody>
             </table>
           </div>
