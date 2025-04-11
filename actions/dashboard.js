@@ -31,3 +31,17 @@ export async function getLowStock() {
   console.log("Low Stock Error:", error);
   return data;
 }
+
+export async function getAllOrder() {
+  // Fetch 10 most recent orders
+  const { data, error } = await supabase.from("order").select();
+
+  console.log("Data:", data);
+  console.log("Error:", error);
+  return data;
+}
+
+export async function getAllCustomer() {
+  const { data, error } = await supabase.from("customers").select();
+  return data;
+}

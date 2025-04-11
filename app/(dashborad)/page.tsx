@@ -1,8 +1,13 @@
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { getRecentOrder } from "@/actions/dashboard";
-import { getLowStock } from "@/actions/dashboard";
+import {
+  getRecentOrder,
+  getAllCustomer,
+  getAllOrder,
+  getLowStock,
+} from "@/actions/dashboard";
+
 import {
   AlertTriangle,
   FileText,
@@ -11,10 +16,13 @@ import {
   Truck,
 } from "lucide-react";
 import Link from "next/link";
+import { customers } from "@/lib/data";
 
 export default async function Dashboard() {
-  const order = (await getRecentOrder()) || [];
-  const stock = (await getLowStock()) || [];
+  const recentorder = (await getRecentOrder()) || [];
+  const lowstock = (await getLowStock()) || [];
+  const allorder = (await getAllOrder()) || [];
+  const allcustomer = (await getAllCustomer()) || [];
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
@@ -149,7 +157,7 @@ export default async function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {order.map((order: any) => (
+                {recentorder.map((order: any) => (
                   <tr key={order.order_id} className="border-b">
                     <td className="px-4 py-3 text-sm text-pharma-600">
                       {order.order_id}
@@ -192,7 +200,7 @@ export default async function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {stock.map((stock: any) => (
+                {lowstock.map((stock: any) => (
                   <tr key={stock.stock_id} className="border-b">
                     <td className="px-4 py-3">
                       <div className="flex items-center">
@@ -312,19 +320,37 @@ export default async function Dashboard() {
           <div className="grid grid-cols-4 gap-4 mt-4">
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Total Sales</p>
-              <p className="text-xl font-bold text-pharma-600">$42,389</p>
+              <p className="text-xl font-bold text-pharma-600">
+                {allorder
+                  .reduce(
+                    (sum: number, current: any) => sum + current.total_price,
+                    0
+                  )
+                  .toFixed(2)}
+              </p>
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Customers</p>
-              <p className="text-xl font-bold text-pharma-600">1,852</p>
+              <p className="text-xl font-bold text-pharma-600">
+                {allcustomer.length}
+              </p>
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Orders</p>
-              <p className="text-xl font-bold text-pharma-600">3,426</p>
+              <p className="text-xl font-bold text-pharma-600">
+                {allorder.length}
+              </p>
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Avg. Order Value</p>
-              <p className="text-xl font-bold text-pharma-600">$64.25</p>
+              <p className="text-xl font-bold text-pharma-600">
+                {(
+                  allorder.reduce(
+                    (sum: number, current: any) => sum + current.total_price,
+                    0
+                  ) / allorder.length || 0
+                ).toFixed(2)}
+              </p>
             </div>
           </div>
         </div>
