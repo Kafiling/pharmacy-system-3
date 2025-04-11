@@ -17,3 +17,14 @@ export async function getRecentOrder() {
   console.log("Error:", error);
   return data;
 }
+
+export async function getLowStock() {
+  // Fetch 10 most recent orders
+  const { data, error } = await supabase
+    .from("stock")
+    .select()
+    .lt("quantity", 50);
+  console.log("Low Stock Data:", data);
+  console.log("Low Stock Data:", error);
+  return data;
+}

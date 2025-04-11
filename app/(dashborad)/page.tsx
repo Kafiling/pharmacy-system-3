@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { getRecentOrder } from "@/actions/dashboard";
+import { getLowStock } from "@/actions/dashboard";
 import {
   AlertTriangle,
   FileText,
@@ -13,6 +14,7 @@ import Link from "next/link";
 
 export default async function Dashboard() {
   const order = (await getRecentOrder()) || [];
+  const stock = (await getLowStock()) || [];
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
@@ -147,20 +149,6 @@ export default async function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b">
-                  <td className="px-4 py-3 text-sm text-pharma-600">TESTING</td>
-                  <td className="px-4 py-3 text-sm">Unknown</td>
-                  <td className="px-4 py-3 text-sm">
-                    <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-                      Completed
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm">$125.00</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">
-                    10:07 PM
-                  </td>
-                </tr>
-
                 {order.map((order: any) => (
                   <tr key={order.order_id} className="border-b">
                     <td className="px-4 py-3 text-sm text-pharma-600">
@@ -170,7 +158,9 @@ export default async function Dashboard() {
                       {order.customers.firstname} {order.customers.lastname}
                     </td>
                     <td className="px-4 py-3 text-sm">{order.employee_id}</td>
-                    <td className="px-4 py-3 text-sm">฿{order.total_price.toFixed(2)}</td>
+                    <td className="px-4 py-3 text-sm">
+                      ฿{order.total_price.toFixed(2)}
+                    </td>
                     <td className="px-4 py-3 text-sm">{order.order_date}</td>
                   </tr>
                 ))}
@@ -202,108 +192,6 @@ export default async function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center">
-                      <div className="h-8 w-8 flex items-center justify-center bg-blue-100 rounded-md mr-2">
-                        <PillIcon className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="font-medium text-sm">Amoxicillin</div>
-                        <div className="text-xs text-muted-foreground">
-                          500mg
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <div>10 boxes</div>
-                    <div className="text-xs text-muted-foreground">
-                      Min: 20 boxes
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="badge-critical">Critical</span>
-                  </td>
-                  <td className="px-4 py-3 text-sm">Unknown</td>
-                  <td className="px-4 py-3 text-sm">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-pharma-600 hover:text-pharma-700 hover:bg-pharma-50"
-                    >
-                      Order
-                    </Button>
-                  </td>
-                </tr>
-                <tr className="border-b">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center">
-                      <div className="h-8 w-8 flex items-center justify-center bg-blue-100 rounded-md mr-2">
-                        <PillIcon className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="font-medium text-sm">Lisinopril</div>
-                        <div className="text-xs text-muted-foreground">
-                          10mg
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <div>8 bottles</div>
-                    <div className="text-xs text-muted-foreground">
-                      Min: 15 bottles
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="badge-low">Low</span>
-                  </td>
-                  <td className="px-4 py-3 text-sm">Unknown</td>
-                  <td className="px-4 py-3 text-sm">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-pharma-600 hover:text-pharma-700 hover:bg-pharma-50"
-                    >
-                      Order
-                    </Button>
-                  </td>
-                </tr>
-                <tr className="border-b">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center">
-                      <div className="h-8 w-8 flex items-center justify-center bg-blue-100 rounded-md mr-2">
-                        <PillIcon className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="font-medium text-sm">Atorvastatin</div>
-                        <div className="text-xs text-muted-foreground">
-                          20mg
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <div>12 boxes</div>
-                    <div className="text-xs text-muted-foreground">
-                      Min: 25 boxes
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="badge-critical">Critical</span>
-                  </td>
-                  <td className="px-4 py-3 text-sm">Unknown</td>
-                  <td className="px-4 py-3 text-sm">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-pharma-600 hover:text-pharma-700 hover:bg-pharma-50"
-                    >
-                      Order
-                    </Button>
-                  </td>
-                </tr>
                 <tr>
                   <td className="px-4 py-3">
                     <div className="flex items-center">
@@ -338,6 +226,31 @@ export default async function Dashboard() {
                     </Button>
                   </td>
                 </tr>
+                {stock.map((stock: any) => (
+                  <tr key={stock.stock_id} className="border-b">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center">
+                        <div className="h-8 w-8 flex items-center justify-center bg-blue-100 rounded-md mr-2">
+                          <PillIcon className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-sm">
+                            {stock.medicine.medicine_name}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Type {stock.medicine.categories_id}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      <div>{stock.quantity_in_stock} units</div>
+                      <div className="text-xs text-muted-foreground">
+                        Min: 30 bottles
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
