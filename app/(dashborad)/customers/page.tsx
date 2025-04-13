@@ -26,7 +26,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Download, Edit, MoreHorizontal, Plus, Search, ShoppingBag, Trash, User } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { getAllCustomers } from "@/actions/customers"; // Import the function
+import { getAllCustomers, addCustomer } from "@/actions/customers"; // Import addCustomer function
 
 // Define type for customer data
 interface Customer {
@@ -44,18 +44,24 @@ export default function CustomersPage() {
   const [customersData, setCustomersData] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [isDialogOpen, setDialogOpen] = useState(false); // State for dialog open/close
+  const [newCustomerFirstName, setNewCustomerFirstName] = useState(""); // State for first name input
+  const [newCustomerLastName, setNewCustomerLastName] = useState(""); // State for last name input
+  const [newCustomerEmail, setNewCustomerEmail] = useState(""); // State for email input
+  const [newCustomerPhone, setNewCustomerPhone] = useState(""); // State for phone input
+  const [newCustomerAddress, setNewCustomerAddress] = useState(""); // State for address input
+  const [submissionError, setSubmissionError] = useState<string | null>(null); // State for form submission errors
 
   useEffect(() => {
     const fetchCustomers = async () => {
       setLoading(true);
       setError(null);
       try {
-        const customersFromDb = await getAllCustomers(); // Call the imported function
-
+        const customersFromDb = await getAllCustomers();
         if (customersFromDb) {
-          setCustomersData(customersFromDb as Customer[]); // Type assertion
+          setCustomersData(customersFromDb as Customer[]);
         } else {
-          setError(new Error("Failed to fetch customers from database.")); // Handle potential null return
+          setError(new Error("Failed to fetch customers from database."));
         }
       } catch (err) {
         setError(err instanceof Error ? err : new Error('An unexpected error occurred'));
@@ -65,7 +71,64 @@ export default function CustomersPage() {
     };
 
     fetchCustomers();
-  }, []);
+  }, []); // Fetch customers on component mount
+
+  const refreshCustomerList = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const customersFromDb = await getAllCustomers();
+      if (customersFromDb) {
+        setCustomersData(customersFromDb as Customer[]);
+      } else {
+        setError(new Error("Failed to fetch customers from database."));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('An unexpected error occurred'));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleAddCustomer = async () => {
+    setSubmissionError(null); // Clear previous submission errors
+    if (!newCustomerFirstName || !newCustomerLastName || !newCustomerEmail || !newCustomerAddress) {
+      setSubmissionError("Please fill in all required fields.");
+      return;
+    }
+
+    const customerData = {
+      firstname: newCustomerFirstName,
+      lastname: newCustomerLastName,
+      email: newCustomerEmail,
+      phone: newCustomerPhone || null, // Allow null for phone
+      address: newCustomerAddress,
+      customer_id: generateCustomerID(), // Generate a customer ID
+    };
+
+    try {
+      const result = await addCustomer(customerData);
+      if (result.error) {
+        setSubmissionError(`Failed to add customer: ${result.error.message || 'Unknown error'}`);
+      } else {
+        // Customer added successfully
+        setDialogOpen(false); // Close the dialog
+        setNewCustomerFirstName(""); // Clear input fields
+        setNewCustomerLastName("");
+        setNewCustomerEmail("");
+        setNewCustomerPhone("");
+        setNewCustomerAddress("");
+        refreshCustomerList(); // Refresh customer list to show new customer
+      }
+    } catch (err) {
+      setSubmissionError("An unexpected error occurred while adding customer.");
+    }
+  };
+
+  const generateCustomerID = () => {
+    return Math.random().toString(36).substring(2, 8).toUpperCase(); // Basic ID generation, consider more robust method
+  };
+
 
   // Filter customers (same as before)
   const filteredCustomers = customersData.filter(
@@ -99,10 +162,9 @@ export default function CustomersPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* ... rest of the component JSX is the same as before ... */}
       <div className="flex justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Customer Management</h1>
-        <Dialog>
+        <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
@@ -115,28 +177,59 @@ export default function CustomersPage() {
               <DialogDescription>Enter the details of the new customer to add to your database.</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
+              {submissionError && <p className="text-red-500">{submissionError}</p>}
               <div className="grid gap-2">
-                <Label htmlFor="name">Full Name</Label>
-                <Input id="name" placeholder="Enter customer name" />
+                <Label htmlFor="firstName">First Name</Label>
+                <Input
+                  id="firstName"
+                  placeholder="Enter first name"
+                  value={newCustomerFirstName}
+                  onChange={(e) => setNewCustomerFirstName(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  id="lastName"
+                  placeholder="Enter last name"
+                  value={newCustomerLastName}
+                  onChange={(e) => setNewCustomerLastName(e.target.value)}
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="Enter email address" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter email address"
+                    value={newCustomerEmail}
+                    onChange={(e) => setNewCustomerEmail(e.target.value)}
+                  />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input id="phone" placeholder="Enter phone number" />
+                  <Label htmlFor="phone">Phone (Optional)</Label>
+                  <Input
+                    id="phone"
+                    placeholder="Enter phone number"
+                    value={newCustomerPhone}
+                    onChange={(e) => setNewCustomerPhone(e.target.value)}
+                  />
                 </div>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="address">Address</Label>
-                <Input id="address" placeholder="Enter address" />
+                <Input
+                  id="address"
+                  placeholder="Enter address"
+                  value={newCustomerAddress}
+                  onChange={(e) => setNewCustomerAddress(e.target.value)}
+                />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline">Cancel</Button>
-              <Button>Save Customer</Button>
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleAddCustomer}>Save Customer</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -162,6 +255,7 @@ export default function CustomersPage() {
           </Button>
         </div>
 
+        {/* ... rest of the component JSX is the same as before ... */}
         <Tabs defaultValue="list" className="w-full">
           <TabsList>
             <TabsTrigger value="list">List View</TabsTrigger>
