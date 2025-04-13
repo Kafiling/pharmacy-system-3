@@ -27,7 +27,7 @@ import { Edit, Mail, MoreHorizontal, Phone, Plus, Search, Trash } from "lucide-r
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getAllSuppliers, deleteSupplier } from "@/actions/suppliers" // Import deleteSupplier action
+import { getAllSuppliers, deleteSupplier, addSupplier } from "@/actions/suppliers" // Import addSupplier action
 import { type Supplier } from "@/lib/data" // Keep the type definition, but we will adjust it if needed
 
 export default function SuppliersPage() {
@@ -36,6 +36,13 @@ export default function SuppliersPage() {
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null)
   const [viewSupplierDetails, setViewSupplierDetails] = useState(false)
   const [loading, setLoading] = useState(true); // Add loading state
+  const [openAddDialog, setOpenAddDialog] = useState(false); // State for Add Supplier Dialog
+  const [newSupplierName, setNewSupplierName] = useState("");
+  const [newContactPerson, setNewContactPerson] = useState(""); // Not used in DB, but keeping it for UI consistency
+  const [newSupplierEmail, setNewSupplierEmail] = useState("");
+  const [newSupplierPhone, setNewSupplierPhone] = useState("");
+  const [newSupplierAddress, setNewSupplierAddress] = useState("");
+
 
   useEffect(() => {
     const fetchSuppliers = async () => {
@@ -63,6 +70,29 @@ export default function SuppliersPage() {
     fetchSuppliers();
   }, []);
 
+  // Refetch suppliers function to update the list after adding/deleting
+  const refetchSuppliers = async () => {
+    setLoading(true);
+    const data = await getAllSuppliers();
+    if (data) {
+      const transformedSuppliers = data.map((supplier) => ({
+        id: supplier.supplier_id,
+        name: supplier.supplier_name,
+        contactPerson: "Contact Person",
+        email: supplier.supplier_email,
+        phone: supplier.supplier_phone,
+        address: supplier.supplier_address,
+        products: [],
+      }));
+      setSuppliers(transformedSuppliers);
+    } else {
+      console.error("Failed to fetch suppliers.");
+      setSuppliers([]);
+    }
+    setLoading(false);
+  };
+
+
   // Filter suppliers
   const filteredSuppliers = suppliers.filter(
     (supplier) =>
@@ -76,13 +106,38 @@ export default function SuppliersPage() {
       // Optimistically update the UI by removing the deleted supplier
       setSuppliers(suppliers.filter((supplier) => supplier.id !== supplierId));
       console.log(`Supplier with ID ${supplierId} deleted successfully`);
-      // Optionally you could refetch suppliers here to ensure data is up-to-date
-      // fetchSuppliers();
+      refetchSuppliers(); // Refetch to ensure data is up-to-date
     } else {
       console.error(`Failed to delete supplier with ID ${supplierId}`);
       // Handle error, maybe show a toast notification to the user
     }
   };
+
+  const handleAddSupplierSubmit = async () => {
+    const newSupplierData = {
+      supplierName: newSupplierName,
+      supplierEmail: newSupplierEmail,
+      supplierPhone: newSupplierPhone,
+      supplierAddress: newSupplierAddress,
+    };
+
+    const result = await addSupplier(newSupplierData);
+    if (!result.error) {
+      console.log("Supplier added successfully!");
+      setOpenAddDialog(false); // Close the dialog
+      setNewSupplierName(""); // Clear form fields
+      setNewSupplierContactPerson(""); // Clear contact person even though not in DB
+      setNewSupplierEmail("");
+      setNewSupplierPhone("");
+      setNewSupplierAddress("");
+      refetchSuppliers(); // Refetch suppliers to update the list
+      // Optionally show a success message to the user
+    } else {
+      console.error("Failed to add supplier:", result.error);
+      // Optionally show an error message to the user
+    }
+  };
+  const setNewSupplierContactPerson = setNewContactPerson; // Just to fix type error, not used
 
 
   if (loading) {
@@ -93,7 +148,7 @@ export default function SuppliersPage() {
     <div className="flex flex-col gap-4">
       <div className="flex justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Supplier Management</h1>
-        <Dialog>
+        <Dialog open={openAddDialog} onOpenChange={setOpenAddDialog}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
@@ -109,32 +164,60 @@ export default function SuppliersPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="name">Supplier Name</Label>
-                  <Input id="name" placeholder="Enter supplier name" />
+                  <Input
+                    id="name"
+                    placeholder="Enter supplier name"
+                    value={newSupplierName}
+                    onChange={(e) => setNewSupplierName(e.target.value)}
+                  />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="contactPerson">Contact Person</Label>
-                  <Input id="contactPerson" placeholder="Enter contact person" />
+                  <Input
+                    id="contactPerson"
+                    placeholder="Enter contact person"
+                    value={newContactPerson}
+                    onChange={(e) => setNewContactPerson(e.target.value)} // Still keep state for UI consistency
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="Enter email address" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter email address"
+                    value={newSupplierEmail}
+                    onChange={(e) => setNewSupplierEmail(e.target.value)}
+                  />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="phone">Phone</Label>
-                  <Input id="phone" placeholder="Enter phone number" />
+                  <Input
+                    id="phone"
+                    placeholder="Enter phone number"
+                    value={newSupplierPhone}
+                    onChange={(e) => setNewSupplierPhone(e.target.value)}
+                  />
                 </div>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="address">Address</Label>
-                <Textarea id="address" placeholder="Enter address" />
+                <Textarea
+                  id="address"
+                  placeholder="Enter address"
+                  value={newSupplierAddress}
+                  onChange={(e) => setNewSupplierAddress(e.target.value)}
+                />
               </div>
               {/* Products field removed for now as it's not in the DB schema */}
             </div>
             <DialogFooter>
-              <Button variant="outline">Cancel</Button>
-              <Button>Save Supplier</Button>
+              <Button variant="outline" onClick={() => setOpenAddDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddSupplierSubmit}>Save Supplier</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -214,7 +297,7 @@ export default function SuppliersPage() {
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 className="text-red-600"
-                                onClick={() => handleDeleteSupplier(supplier.id)} // Call handleDeleteSupplier
+                                onClick={() => handleDeleteSupplier(supplier.id)}
                               >
                                 <Trash className="mr-2 h-4 w-4" />
                                 Delete
@@ -271,7 +354,7 @@ export default function SuppliersPage() {
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => handleDeleteSupplier(supplier.id)} // Call handleDeleteSupplier
+                        onClick={() => handleDeleteSupplier(supplier.id)}
                       >
                         <Trash className="h-4 w-4 mr-2" />
                         Delete
@@ -318,7 +401,6 @@ export default function SuppliersPage() {
                 <h3 className="font-medium">Address</h3>
                 <p>{selectedSupplier.address}</p>
               </div>
-              {/* Products details removed for now */}
             </div>
           )}
           <DialogFooter>
