@@ -26,7 +26,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Download, Edit, MoreHorizontal, Plus, Search, ShoppingBag, Trash, User } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { getAllCustomers, addCustomer } from "@/actions/customers"; // Import addCustomer function
+import { getAllCustomers, addCustomer, deleteCustomer } from "@/actions/customers"; // Import addCustomer function
 
 // Define type for customer data
 interface Customer {
@@ -51,6 +51,7 @@ export default function CustomersPage() {
   const [newCustomerPhone, setNewCustomerPhone] = useState(""); // State for phone input
   const [newCustomerAddress, setNewCustomerAddress] = useState(""); // State for address input
   const [submissionError, setSubmissionError] = useState<string | null>(null); // State for form submission errors
+  const [deleteError, setDeleteError] = useState<string | null>(null); // State for delete errors
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -140,6 +141,26 @@ export default function CustomersPage() {
   // Get order count for each customer (Placeholder - Adapt if you fetch orders from DB)
   const getOrderCount = (customerId: string) => {
     return 0; // Placeholder
+  };
+
+  const handleDeleteCustomer = async (customerId: string) => {
+    setDeleteError(null); // Clear previous delete errors
+    try {
+      const result = await deleteCustomer(customerId);
+      if (result.error) {
+        setDeleteError(`Failed to delete customer: ${result.error.message || 'Unknown error'}`);
+        // Optionally, you could show a more user-friendly error message in a toast or dialog
+        console.error("Delete failed:", result.error);
+      } else {
+        // Customer deleted successfully
+        refreshCustomerList(); // Refresh the customer list
+        // Optionally, show a success message to the user (toast or similar)
+        console.log("Customer deleted successfully");
+      }
+    } catch (err) {
+      setDeleteError("An unexpected error occurred while deleting the customer.");
+      console.error("Unexpected delete error:", err);
+    }
   };
 
   // Get initials for avatar (same as before)
@@ -254,8 +275,6 @@ export default function CustomersPage() {
             Export
           </Button>
         </div>
-
-        {/* ... rest of the component JSX is the same as before ... */}
         <Tabs defaultValue="list" className="w-full">
           <TabsList>
             <TabsTrigger value="list">List View</TabsTrigger>
@@ -321,7 +340,7 @@ export default function CustomersPage() {
                                 Edit
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-red-600">
+                              <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteCustomer(customer.customer_id)}>
                                 <Trash className="mr-2 h-4 w-4" />
                                 Delete
                               </DropdownMenuItem>
