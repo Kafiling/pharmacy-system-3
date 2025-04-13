@@ -27,6 +27,7 @@ import { Download, Edit, MoreHorizontal, Plus, Search, ShoppingBag, Trash, User 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { getAllCustomers, addCustomer, deleteCustomer } from "@/actions/customers"; // Import addCustomer function
+import { getOrderCountsByCustomer } from "@/actions/orders"; // Import the new server action
 
 // Define type for customer data
 interface Customer {
@@ -52,17 +53,21 @@ export default function CustomersPage() {
   const [newCustomerAddress, setNewCustomerAddress] = useState(""); // State for address input
   const [submissionError, setSubmissionError] = useState<string | null>(null); // State for form submission errors
   const [deleteError, setDeleteError] = useState<string | null>(null); // State for delete errors
+  const [orderCounts, setOrderCounts] = useState<Array<{ customer_id: string; order_count: number }>>([]); // State to store order counts
 
   useEffect(() => {
-    const fetchCustomers = async () => {
+    const fetchData = async () => {
       setLoading(true);
       setError(null);
       try {
         const customersFromDb = await getAllCustomers();
-        if (customersFromDb) {
+        const orderCountsFromDb = await getOrderCountsByCustomer(); // Fetch order counts
+
+        if (customersFromDb && orderCountsFromDb) {
           setCustomersData(customersFromDb as Customer[]);
+          setOrderCounts(orderCountsFromDb); // Store order counts in state
         } else {
-          setError(new Error("Failed to fetch customers from database."));
+          setError(new Error("Failed to fetch data from database."));
         }
       } catch (err) {
         setError(err instanceof Error ? err : new Error('An unexpected error occurred'));
@@ -71,18 +76,21 @@ export default function CustomersPage() {
       }
     };
 
-    fetchCustomers();
-  }, []); // Fetch customers on component mount
+    fetchData();
+  }, []); // Fetch customers and order counts on component mount
 
   const refreshCustomerList = async () => {
     setLoading(true);
     setError(null);
     try {
       const customersFromDb = await getAllCustomers();
-      if (customersFromDb) {
+      const orderCountsFromDb = await getOrderCountsByCustomer(); // Fetch order counts again
+
+      if (customersFromDb && orderCountsFromDb) {
         setCustomersData(customersFromDb as Customer[]);
+        setOrderCounts(orderCountsFromDb); // Update order counts state
       } else {
-        setError(new Error("Failed to fetch customers from database."));
+        setError(new Error("Failed to fetch data from database."));
       }
     } catch (err) {
       setError(err instanceof Error ? err : new Error('An unexpected error occurred'));
@@ -119,7 +127,7 @@ export default function CustomersPage() {
         setNewCustomerEmail("");
         setNewCustomerPhone("");
         setNewCustomerAddress("");
-        refreshCustomerList(); // Refresh customer list to show new customer
+        refreshCustomerList(); // Refresh customer list to show new customer and updated order counts
       }
     } catch (err) {
       setSubmissionError("An unexpected error occurred while adding customer.");
@@ -138,9 +146,10 @@ export default function CustomersPage() {
       customer.email.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  // Get order count for each customer (Placeholder - Adapt if you fetch orders from DB)
+  // Get order count for each customer (Now using fetched data)
   const getOrderCount = (customerId: string) => {
-    return 0; // Placeholder
+    const count = orderCounts.find(item => item.customer_id === customerId)?.order_count || 0;
+    return count;
   };
 
   const handleDeleteCustomer = async (customerId: string) => {
@@ -153,7 +162,7 @@ export default function CustomersPage() {
         console.error("Delete failed:", result.error);
       } else {
         // Customer deleted successfully
-        refreshCustomerList(); // Refresh the customer list
+        refreshCustomerList(); // Refresh the customer list and order counts
         // Optionally, show a success message to the user (toast or similar)
         console.log("Customer deleted successfully");
       }
