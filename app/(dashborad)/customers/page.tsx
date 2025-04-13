@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   DropdownMenu,
@@ -24,26 +24,62 @@ import {
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Download, Edit, MoreHorizontal, Plus, Search, ShoppingBag, Trash, User } from "lucide-react"
-import { customers, orders } from "@/lib/data"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { getAllCustomers } from "@/actions/customers"; // Import the function
+
+// Define type for customer data
+interface Customer {
+  customer_id: string;
+  firstname: string;
+  lastname: string;
+  phone: string | null;
+  email: string;
+  address: string;
+  dateRegistered?: string;
+}
 
 export default function CustomersPage() {
   const [searchTerm, setSearchTerm] = useState("")
+  const [customersData, setCustomersData] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  // Filter customers
-  const filteredCustomers = customers.filter(
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const customersFromDb = await getAllCustomers(); // Call the imported function
+
+        if (customersFromDb) {
+          setCustomersData(customersFromDb as Customer[]); // Type assertion
+        } else {
+          setError(new Error("Failed to fetch customers from database.")); // Handle potential null return
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('An unexpected error occurred'));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCustomers();
+  }, []);
+
+  // Filter customers (same as before)
+  const filteredCustomers = customersData.filter(
     (customer) =>
-      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      `${customer.firstname} ${customer.lastname}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
       customer.email.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+  );
 
-  // Get order count for each customer
+  // Get order count for each customer (Placeholder - Adapt if you fetch orders from DB)
   const getOrderCount = (customerId: string) => {
-    return orders.filter((order) => order.customerId === customerId).length
-  }
+    return 0; // Placeholder
+  };
 
-  // Get initials for avatar
+  // Get initials for avatar (same as before)
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -52,8 +88,18 @@ export default function CustomersPage() {
       .toUpperCase()
   }
 
+  if (loading) {
+    return <div>Loading customers...</div>;
+  }
+
+  if (error) {
+    return <div>Error fetching customers: {error.message}</div>;
+  }
+
+
   return (
     <div className="flex flex-col gap-4">
+      {/* ... rest of the component JSX is the same as before ... */}
       <div className="flex justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Customer Management</h1>
         <Dialog>
@@ -144,20 +190,20 @@ export default function CustomersPage() {
                     </TableRow>
                   ) : (
                     filteredCustomers.map((customer) => (
-                      <TableRow key={customer.id}>
-                        <TableCell className="font-medium">{customer.id}</TableCell>
+                      <TableRow key={customer.customer_id}>
+                        <TableCell className="font-medium">{customer.customer_id}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Avatar className="h-8 w-8">
-                              <AvatarFallback>{getInitials(customer.name)}</AvatarFallback>
+                              <AvatarFallback>{getInitials(`${customer.firstname} ${customer.lastname}`)}</AvatarFallback>
                             </Avatar>
-                            {customer.name}
+                            {`${customer.firstname} ${customer.lastname}`}
                           </div>
                         </TableCell>
                         <TableCell className="hidden md:table-cell">{customer.email}</TableCell>
                         <TableCell className="hidden md:table-cell">{customer.phone}</TableCell>
                         <TableCell className="hidden lg:table-cell">{customer.address}</TableCell>
-                        <TableCell>{getOrderCount(customer.id)}</TableCell>
+                        <TableCell>{getOrderCount(customer.customer_id)}</TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -201,14 +247,14 @@ export default function CustomersPage() {
                 <div className="col-span-full text-center py-10">No customers found.</div>
               ) : (
                 filteredCustomers.map((customer) => (
-                  <Card key={customer.id}>
+                  <Card key={customer.customer_id}>
                     <CardHeader>
                       <div className="flex items-center gap-2">
                         <Avatar className="h-10 w-10">
-                          <AvatarFallback>{getInitials(customer.name)}</AvatarFallback>
+                          <AvatarFallback>{getInitials(`${customer.firstname} ${customer.lastname}`)}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <CardTitle>{customer.name}</CardTitle>
+                          <CardTitle>{`${customer.firstname} ${customer.lastname}`}</CardTitle>
                           <CardDescription>{customer.email}</CardDescription>
                         </div>
                       </div>
@@ -219,13 +265,15 @@ export default function CustomersPage() {
                           <span className="text-sm text-muted-foreground">Phone:</span>
                           <span>{customer.phone}</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">Registered:</span>
-                          <span>{customer.dateRegistered}</span>
-                        </div>
+                        {customer.dateRegistered && (
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">Registered:</span>
+                            <span>{customer.dateRegistered}</span>
+                          </div>
+                        )}
                         <div className="flex justify-between">
                           <span className="text-sm text-muted-foreground">Total Orders:</span>
-                          <span>{getOrderCount(customer.id)}</span>
+                          <span>{getOrderCount(customer.customer_id)}</span>
                         </div>
                       </div>
                     </CardContent>
@@ -249,4 +297,3 @@ export default function CustomersPage() {
     </div>
   )
 }
-
