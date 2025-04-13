@@ -27,7 +27,7 @@ import { Edit, Mail, MoreHorizontal, Phone, Plus, Search, Trash } from "lucide-r
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getAllSuppliers, deleteSupplier, addSupplier } from "@/actions/suppliers" // Import addSupplier action
+import { getAllSuppliers, deleteSupplier, addSupplier, updateSupplier } from "@/actions/suppliers" // Import updateSupplier action
 import { type Supplier } from "@/lib/data" // Keep the type definition, but we will adjust it if needed
 
 export default function SuppliersPage() {
@@ -42,6 +42,14 @@ export default function SuppliersPage() {
   const [newSupplierEmail, setNewSupplierEmail] = useState("");
   const [newSupplierPhone, setNewSupplierPhone] = useState("");
   const [newSupplierAddress, setNewSupplierAddress] = useState("");
+
+  // State and functions for Edit Supplier Dialog
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [editSupplierName, setEditSupplierName] = useState("");
+  const [editContactPerson, setEditContactPerson] = useState(""); // Not used in DB, but keeping it for UI consistency
+  const [editSupplierEmail, setEditSupplierEmail] = useState("");
+  const [editSupplierPhone, setEditSupplierPhone] = useState("");
+  const [editSupplierAddress, setEditSupplierAddress] = useState("");
 
 
   useEffect(() => {
@@ -70,7 +78,7 @@ export default function SuppliersPage() {
     fetchSuppliers();
   }, []);
 
-  // Refetch suppliers function to update the list after adding/deleting
+  // Refetch suppliers function to update the list after adding/deleting/editing
   const refetchSuppliers = async () => {
     setLoading(true);
     const data = await getAllSuppliers();
@@ -138,6 +146,41 @@ export default function SuppliersPage() {
     }
   };
   const setNewSupplierContactPerson = setNewContactPerson; // Just to fix type error, not used
+
+
+  const handleEditSupplier = (supplier: Supplier) => {
+    setSelectedSupplier(supplier);
+    setEditSupplierName(supplier.name);
+    setEditContactPerson(supplier.contactPerson); // For UI consistency
+    setEditSupplierEmail(supplier.email);
+    setEditSupplierPhone(supplier.phone);
+    setEditSupplierAddress(supplier.address);
+    setOpenEditDialog(true);
+  };
+
+  const handleEditSupplierSubmit = async () => {
+    if (!selectedSupplier) return; // Ensure a supplier is selected for editing
+
+    const updatedSupplierData = {
+      supplierId: selectedSupplier.id, // Make sure to send the ID for update
+      supplierName: editSupplierName,
+      supplierEmail: editSupplierEmail,
+      supplierPhone: editSupplierPhone,
+      supplierAddress: editSupplierAddress,
+    };
+
+    const result = await updateSupplier(updatedSupplierData); // Use updateSupplier action
+    if (!result.error) {
+      console.log(`Supplier with ID ${selectedSupplier.id} updated successfully!`);
+      setOpenEditDialog(false); // Close edit dialog
+      refetchSuppliers(); // Refetch suppliers to update the list
+      // Optionally show success message
+    } else {
+      console.error(`Failed to update supplier with ID ${selectedSupplier.id}:`, result.error);
+      // Optionally show error message
+    }
+  };
+  const setEditNewSupplierContactPerson = setEditContactPerson; // Just to fix type error, not used
 
 
   if (loading) {
@@ -221,6 +264,75 @@ export default function SuppliersPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Edit Supplier Dialog */}
+        <Dialog open={openEditDialog} onOpenChange={setOpenEditDialog}>
+          <DialogContent className="sm:max-w-[550px]">
+            <DialogHeader>
+              <DialogTitle>Edit Supplier</DialogTitle>
+              <DialogDescription>Edit the details of the supplier.</DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-name">Supplier Name</Label>
+                  <Input
+                    id="edit-name"
+                    placeholder="Enter supplier name"
+                    value={editSupplierName}
+                    onChange={(e) => setEditSupplierName(e.target.value)}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-contactPerson">Contact Person</Label>
+                  <Input
+                    id="edit-contactPerson"
+                    placeholder="Enter contact person"
+                    value={editContactPerson}
+                    onChange={(e) => setEditContactPerson(e.target.value)} // Still keep state for UI consistency
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-email">Email</Label>
+                  <Input
+                    id="edit-email"
+                    type="email"
+                    placeholder="Enter email address"
+                    value={editSupplierEmail}
+                    onChange={(e) => setEditSupplierEmail(e.target.value)}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-phone">Phone</Label>
+                  <Input
+                    id="edit-phone"
+                    placeholder="Enter phone number"
+                    value={editSupplierPhone}
+                    onChange={(e) => setEditSupplierPhone(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-address">Address</Label>
+                <Textarea
+                  id="edit-address"
+                  placeholder="Enter address"
+                  value={editSupplierAddress}
+                  onChange={(e) => setEditSupplierAddress(e.target.value)}
+                />
+              </div>
+              {/* Products field removed for now as it's not in the DB schema */}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setOpenEditDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleEditSupplierSubmit}>Update Supplier</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="flex flex-col gap-4">
@@ -290,7 +402,9 @@ export default function SuppliersPage() {
                               >
                                 View Details
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleEditSupplier(supplier)} // Open Edit Dialog
+                              >
                                 <Edit className="mr-2 h-4 w-4" />
                                 Edit
                               </DropdownMenuItem>
@@ -347,7 +461,7 @@ export default function SuppliersPage() {
                       >
                         View Details
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => handleEditSupplier(supplier)}> {/* Open Edit Dialog */}
                         <Edit className="h-4 w-4 mr-2" />
                         Edit
                       </Button>

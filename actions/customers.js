@@ -43,3 +43,35 @@ export async function deleteCustomer(customer_id) {
     return { error: { message: "An unexpected error occurred while deleting customer." } };
   }
 }
+
+// ADD THIS FUNCTION BELOW:
+export async function updateCustomer(customerData) {
+  const { customer_id, firstname, lastname, email, phone, address } = customerData; // Destructure customerData
+
+  try {
+    const { data, error } = await supabase
+      .from("customers")
+      .update({ // Use update() to modify existing record
+        firstname: firstname,
+        lastname: lastname,
+        email: email,
+        phone: phone,
+        address: address,
+        // dateRegistered should likely NOT be updated here, unless you have a specific reason.
+        // If you want to update dateRegistered, include it here.
+      })
+      .eq("customer_id", customer_id); // Specify which customer to update using customer_id
+
+    if (error) {
+      console.error("Supabase Error updating customer:", error);
+      return { error: { message: "Failed to update customer in database." } };
+    }
+
+    revalidatePath('/customers'); // Revalidate the customers page to refresh data
+    return { data: { message: "Customer updated successfully." } };
+
+  } catch (err) {
+    console.error("Error updating customer:", err);
+    return { error: { message: "An unexpected error occurred while updating customer." } };
+  }
+}

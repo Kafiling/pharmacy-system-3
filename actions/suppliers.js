@@ -55,3 +55,23 @@ export async function addSupplier(supplierData) {
   }
   return { data };
 }
+
+export async function updateSupplier(updatedSupplierData) {
+  const { supplierId, supplierName, supplierPhone, supplierEmail, supplierAddress } = updatedSupplierData;
+
+  const { data, error } = await supabase
+    .from("supplier")
+    .update({
+      supplier_name: supplierName,
+      supplier_phone: supplierPhone,
+      supplier_email: supplierEmail,
+      supplier_address: supplierAddress,
+    })
+    .eq("supplier_id", supplierId);
+
+  if (error) {
+    console.error("Error updating supplier:", error);
+    return { error };
+  }
+  return { data };
+}
