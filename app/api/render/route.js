@@ -1,6 +1,6 @@
 // filepath: /Users/kafiling/Projects/pharmacy-system-3/app/api/render-pdf/route.js
 import ReactPDF from "@react-pdf/renderer";
-import { MyDocument } from "@/Documents/Prescription";
+import { MyDocument } from "@/Documents/MedicieneLabel";
 import { NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
