@@ -1,4 +1,4 @@
-import { getAllStock } from "@/actions/stock";
+import { getAllStock } from "@/app/actions/stock";
 
 export default async function page() {
   const stock = (await getAllStock()) || [];
