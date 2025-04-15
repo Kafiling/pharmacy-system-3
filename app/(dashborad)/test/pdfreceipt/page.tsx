@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { receiptBuilder } from "@/app/actions/ReceiptBuilder";
+import { receiptBuilder } from "@/app/actions/receiptBuilder";
 
 export default function Page() {
   const [orderId, setOrderId] = useState("000001"); // State to manage the input value
