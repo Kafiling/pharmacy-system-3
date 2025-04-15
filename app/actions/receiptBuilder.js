@@ -39,7 +39,7 @@ export async function receiptBuilder(orderId) {
 
   console.log("Combined Data:", combinedData);
   // Call the API route to generate the PDF
-  const response = await fetch("/api/medlabel", {
+  const response = await fetch("/api/receipt", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
