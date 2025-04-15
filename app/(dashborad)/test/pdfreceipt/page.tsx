@@ -12,7 +12,7 @@ export default function Page() {
     // Trigger the download of the generated PDF
     const link = document.createElement("a");
     link.href = "/documents/completed/paymentreceipt.pdf"; // Adjust the path to your generated PDF
-    link.download = `Order_${orderId}_Label.pdf`; // Set the desired file name
+    link.download = `Receipt_${orderId}.pdf`; // Set the desired file name
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

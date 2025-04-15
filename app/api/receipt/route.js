@@ -62,9 +62,85 @@ export async function POST(req) {
 
     drawTextOnPage(
       firstPage,
+      data.orderData.customers.firstname +
+        " " +
+        data.orderData.customers.lastname,
+      400,
+      height - 169,
+      thSarabunFont,
+      14
+    );
+
+    drawTextOnPage(
+      firstPage,
+      data.orderData.customer_id,
+      415,
+      height - 190,
+      thSarabunFont,
+      14
+    );
+    let total_price = 0;
+    for (let i = 0; i < data.orderDetails.length; i++) {
+      const orderDetail = data.orderDetails[i];
+      const yPosition = height - 285 - i * 30; // Adjust the y position for each item
+      total_price += orderDetail.medicine.price * orderDetail.quantity;
+      drawTextOnPage(
+        firstPage,
+        orderDetail.medicine.medicine_name,
+        60,
+        yPosition,
+        thSarabunFont,
+        14
+      );
+      drawTextOnPage(
+        firstPage,
+        orderDetail.quantity,
+        290,
+        yPosition,
+        thSarabunFont,
+        14
+      );
+      drawTextOnPage(
+        firstPage,
+        orderDetail.medicine.price.toFixed(2),
+        380,
+        yPosition,
+        thSarabunFont,
+        14
+      );
+      drawTextOnPage(
+        firstPage,
+        orderDetail.medicine.price.toFixed(2),
+        465,
+        yPosition,
+        thSarabunFont,
+        14
+      );
+    }
+
+    drawTextOnPage(
+      firstPage,
+      total_price.toFixed(2) + " THB",
+      430,
+      height - 565,
+      thSarabunFont,
+      14
+    );
+    drawTextOnPage(firstPage, "0.00 THB", 430, height - 592, thSarabunFont, 14);
+    drawTextOnPage(
+      firstPage,
+      total_price.toFixed(2) + " THB",
+      430,
+      height - 620,
+      thSarabunFont,
+      14
+    );
+
+    drawTextOnPage(
+      firstPage,
       data.orderData.order_id,
-      93,
-      height - 150,
+      160,
+      height - 680,
       thSarabunFont,
       14
     );

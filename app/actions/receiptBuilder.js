@@ -9,7 +9,7 @@ export async function receiptBuilder(orderId) {
   // Fetch order details from Supabase
   const { data: orderDetails, error: orderDetailsError } = await supabase
     .from("order_details")
-    .select(`*, medicine(medicine_id, medicine_name)`)
+    .select(`*, medicine(medicine_id, medicine_name,price)`)
     .eq("order_id", orderId);
 
   if (orderDetailsError) {
