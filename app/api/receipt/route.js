@@ -16,7 +16,7 @@ export async function POST(req) {
     const fontBytes = fs.readFileSync(fontPath);
 
     // Load the existing PDF
-    const pdfPath = path.resolve(
+    const pdfPath = path.join(
       process.cwd(),
       "public/documents/PaymentReceipt.pdf"
     );
