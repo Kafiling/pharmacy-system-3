@@ -1,6 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { getAllStock } from "@/app/actions/stock"
+import { useEffect,useState } from "react"
+import { transformStockData } from "@/lib/transformStock"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   DropdownMenu,
@@ -29,10 +31,32 @@ import { medicines, type Medicine } from "@/lib/data"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function InventoryPage() {
+  const [medicines, setMedicines] = useState<Medicine[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [sortBy, setSortBy] = useState<keyof Medicine>("name")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const stockData = await getAllStock()
+        if (stockData) {
+          const transformedData = transformStockData(stockData)
+          setMedicines(transformedData)
+        }
+      } catch (err) {
+        setError("Failed to fetch inventory data")
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   // Get unique categories for filter
   const categories = Array.from(new Set(medicines.map((med) => med.category)))
@@ -43,7 +67,7 @@ export default function InventoryPage() {
       (medicine) =>
         (categoryFilter === "all" || medicine.category === categoryFilter) &&
         (medicine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          medicine.description.toLowerCase().includes(searchTerm.toLowerCase())),
+          medicine.description?.toLowerCase().includes(searchTerm.toLowerCase()))
     )
     .sort((a, b) => {
       const aValue = a[sortBy]
@@ -54,7 +78,6 @@ export default function InventoryPage() {
       } else if (typeof aValue === "number" && typeof bValue === "number") {
         return sortOrder === "asc" ? aValue - bValue : bValue - aValue
       }
-
       return 0
     })
 
