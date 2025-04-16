@@ -16,10 +16,9 @@ export async function POST(req) {
     const fontBytes = fs.readFileSync(fontPath);
 
     // Load the existing PDF
-    const pdfPath = path.join(
-      process.cwd(),
-      "public/documents/PaymentReceipt.pdf"
-    );
+    const pdfPath =
+      `${process.env.VERCEL_URL}/Documents/MedLabel.pdf` ||
+      path.join(process.cwd(), "public/documents/PaymentReceipt.pdf");
     if (!fs.existsSync(pdfPath)) {
       throw new Error(`PDF file not found at ${pdfPath}`);
     }
