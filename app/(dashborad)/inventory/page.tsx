@@ -31,6 +31,7 @@ import { medicines, type Medicine } from "@/lib/data"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function InventoryPage() {
+  const lowStockThreshold = 99;
   const [medicines, setMedicines] = useState<Medicine[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -57,6 +58,9 @@ export default function InventoryPage() {
 
     fetchData()
   }, [])
+
+  const lowStockMedicines = medicines.filter(m => m.stock <= lowStockThreshold);
+  const lowStockCount = lowStockMedicines.length;
 
   // Get unique categories for filter
   const categories = Array.from(new Set(medicines.map((med) => med.category)))
@@ -175,11 +179,16 @@ export default function InventoryPage() {
       </div>
 
       <div className="flex flex-col gap-4">
-        <Alert>
+      {lowStockCount > 0 && (
+        <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Low Stock Alert</AlertTitle>
-          <AlertDescription>3 medicines are below their reorder level. Please check the inventory.</AlertDescription>
+          <AlertDescription>
+            {lowStockCount} medicine(s) below reorder level
+          </AlertDescription>
         </Alert>
+      )}
+
 
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-1 items-center gap-2">
@@ -258,7 +267,7 @@ export default function InventoryPage() {
                       <Badge variant="outline">{medicine.category}</Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      <span className={medicine.stock <= medicine.reorderLevel ? "text-red-500 font-medium" : ""}>
+                      <span className={medicine.stock <= lowStockThreshold ? "text-red-500 font-medium" : ""}>
                         {medicine.stock}
                       </span>
                     </TableCell>
