@@ -311,42 +311,46 @@ export default async function Dashboard() {
       </div>
 
       {/* Summary statistics */}
-      <div className="grid grid-cols-4 gap-4 mt-4">
-        <div className="text-center">
-          <p className="text-sm text-muted-foreground">Total Sales</p>
-          <p className="text-xl font-bold text-pharma-600">
-            ฿
-            {allorder
-              .reduce(
-                (sum: number, current: any) => sum + current.total_price,
-                0
-              )
-              .toLocaleString("en-US", { minimumFractionDigits: 2 })}
-          </p>
+      <Card className="p-4">
+        <div className="grid grid-cols-4 gap-4">
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">Total Sales</p>
+            <p className="text-xl font-bold text-pharma-600">
+              ฿
+              {allorder
+                .reduce(
+                  (sum: number, current: any) => sum + current.total_price,
+                  0
+                )
+                .toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            </p>
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">Total Customers</p>
+            <p className="text-xl font-bold text-pharma-600">
+              {allcustomer.length}
+            </p>
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">Total Orders</p>
+            <p className="text-xl font-bold text-pharma-600">
+              {allorder.length}
+            </p>
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">Avg. Order Value</p>
+            <p className="text-xl font-bold text-pharma-600">
+              ฿
+              {(
+                allorder.reduce(
+                  (sum: number, current: any) => sum + current.total_price,
+                  0
+                ) / allorder.length || 0
+              ).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            </p>
+          </div>
         </div>
-        <div className="text-center">
-          <p className="text-sm text-muted-foreground">Total Customers</p>
-          <p className="text-xl font-bold text-pharma-600">
-            {allcustomer.length}
-          </p>
-        </div>
-        <div className="text-center">
-          <p className="text-sm text-muted-foreground">Total Orders</p>
-          <p className="text-xl font-bold text-pharma-600">{allorder.length}</p>
-        </div>
-        <div className="text-center">
-          <p className="text-sm text-muted-foreground">Avg. Order Value</p>
-          <p className="text-xl font-bold text-pharma-600">
-            ฿
-            {(
-              allorder.reduce(
-                (sum: number, current: any) => sum + current.total_price,
-                0
-              ) / allorder.length || 0
-            ).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-          </p>
-        </div>
-      </div>
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="p-4 flex flex-col items-center text-center">
