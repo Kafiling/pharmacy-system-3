@@ -255,13 +255,13 @@ export default async function Dashboard() {
               size="sm"
               className="bg-pharma-600 text-white hover:bg-pharma-700"
             >
+              Recent
+            </Button>
+            <Button variant="outline" size="sm">
               Weekly
             </Button>
             <Button variant="outline" size="sm">
               Monthly
-            </Button>
-            <Button variant="outline" size="sm">
-              Yearly
             </Button>
           </div>
         </div>
@@ -274,22 +274,23 @@ export default async function Dashboard() {
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Total Sales</p>
               <p className="text-xl font-bold text-pharma-600">
+                ฿
                 {allorder
                   .reduce(
                     (sum: number, current: any) => sum + current.total_price,
                     0
                   )
-                  .toFixed(2)}
+                  .toLocaleString("en-US", { minimumFractionDigits: 2 })}
               </p>
             </div>
             <div className="text-center">
-              <p className="text-sm text-muted-foreground">Customers</p>
+              <p className="text-sm text-muted-foreground">Total Customers</p>
               <p className="text-xl font-bold text-pharma-600">
                 {allcustomer.length}
               </p>
             </div>
             <div className="text-center">
-              <p className="text-sm text-muted-foreground">Orders</p>
+              <p className="text-sm text-muted-foreground">Total Orders</p>
               <p className="text-xl font-bold text-pharma-600">
                 {allorder.length}
               </p>
@@ -297,12 +298,13 @@ export default async function Dashboard() {
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Avg. Order Value</p>
               <p className="text-xl font-bold text-pharma-600">
+                ฿
                 {(
                   allorder.reduce(
                     (sum: number, current: any) => sum + current.total_price,
                     0
                   ) / allorder.length || 0
-                ).toFixed(2)}
+                ).toLocaleString("en-US", { minimumFractionDigits: 2 })}
               </p>
             </div>
           </div>

@@ -17,12 +17,13 @@ export function SalesBarChart({
 }: {
   data: { date: string; total: number }[];
 }) {
+  const recentData = data.slice(-7); // Get the most recent 7 days
   const chartData = {
-    labels: data.map((item) => item.date), // Dates
+    labels: recentData.map((item) => item.date).reverse(), // Reverse dates for most recent order to the right
     datasets: [
       {
         label: "Total Sales (฿)",
-        data: data.map((item) => item.total), // Total sales
+        data: recentData.map((item) => item.total).reverse(), // Reverse total sales to match reversed dates
         backgroundColor: "rgba(75, 192, 192, 0.6)",
         borderColor: "rgba(75, 192, 192, 1)",
         borderWidth: 1,
@@ -34,23 +35,33 @@ export function SalesBarChart({
     responsive: true,
     plugins: {
       legend: {
-        display: true,
+        display: false,
         position: "top" as const,
       },
     },
     scales: {
       x: {
         title: {
-          display: true,
+          display: false,
           text: "Date",
+        },
+        grid: {
+          display: false, // Remove gridlines on the x-axis
         },
       },
       y: {
         title: {
           display: true,
-          text: "Total Sales (฿)",
+          text: "Value of Dispensed Good (THB)",
         },
         beginAtZero: true,
+        grid: {
+          // Remove gridlines on the y-axis
+          display: false,
+        },
+        ticks: {
+          maxTicksLimit: 6, // Limit the number of steps to 5
+        },
       },
     },
   };
