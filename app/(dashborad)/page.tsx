@@ -6,7 +6,8 @@ import {
   getAllCustomer,
   getAllOrder,
   getLowStock,
-  getOrderDataForGraph,
+  getRecentRevenue,
+  getWeeklyRevenue,
 } from "@/app/actions/dashboard";
 
 import {
@@ -24,7 +25,8 @@ export default async function Dashboard() {
   const lowstock = (await getLowStock()) || [];
   const allorder = (await getAllOrder()) || [];
   const allcustomer = (await getAllCustomer()) || [];
-  const orderDataForGraph = (await getOrderDataForGraph()) || [];
+  const orderDataForGraph = (await getRecentRevenue()) || [];
+  const weeklyRevenue = (await getWeeklyRevenue()) || [];
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
@@ -258,22 +260,7 @@ export default async function Dashboard() {
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="overflow-hidden">
           <div className="p-4 flex justify-between items-center border-b">
-            <h3 className="font-medium">Sales Overview</h3>
-            <div className="flex space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-pharma-600 text-white hover:bg-pharma-700"
-              >
-                Recent
-              </Button>
-              <Button variant="outline" size="sm">
-                Weekly
-              </Button>
-              <Button variant="outline" size="sm">
-                Monthly
-              </Button>
-            </div>
+            <h3 className="font-medium">Recent Orders (10 days)</h3>
           </div>
           <div className="p-4">
             <div className="h-64 w-full">
@@ -284,31 +271,32 @@ export default async function Dashboard() {
         </Card>
         <Card className="overflow-hidden">
           <div className="p-4 flex justify-between items-center border-b">
-            <h3 className="font-medium">Sales Overview</h3>
-            <div className="flex space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-pharma-600 text-white hover:bg-pharma-700"
-              >
-                Recent
-              </Button>
-              <Button variant="outline" size="sm">
-                Weekly
-              </Button>
-              <Button variant="outline" size="sm">
-                Monthly
-              </Button>
-            </div>
+            <h3 className="font-medium">This Month</h3>
           </div>
           <div className="p-4">
             <div className="h-64 w-full">
               {/* This would be a chart component in a real implementation */}
-              <SalesBarChart data={orderDataForGraph} />
+              <SalesBarChart
+                data={weeklyRevenue.map((item, index) => ({
+                  date: `Week ${index + 1}`,
+                  total: item.total,
+                }))}
+              />
             </div>
           </div>
         </Card>
       </div>
+      <Card className="overflow-hidden">
+        <div className="p-4 flex justify-between items-center border-b">
+          <h3 className="font-medium">This Year</h3>
+        </div>
+        <div className="p-4">
+          <div className="h-64 w-full">
+            {/* This would be a chart component in a real implementation */}
+            <SalesBarChart data={orderDataForGraph} />
+          </div>
+        </div>
+      </Card>
 
       {/* Summary statistics */}
       <Card className="p-4">
