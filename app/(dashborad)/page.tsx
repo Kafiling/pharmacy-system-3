@@ -6,7 +6,7 @@ import {
   getAllCustomer,
   getAllOrder,
   getLowStock,
-} from "@/actions/dashboard";
+} from "@/app/actions/dashboard";
 
 import {
   AlertTriangle,
