@@ -17,13 +17,13 @@ export function SalesBarChart({
 }: {
   data: { date: string; total: number }[];
 }) {
-  const recentData = data.slice(-7); // Get the most recent 7 days
+  const recentData = data.slice(-10); // Get the most recent x days
   const chartData = {
-    labels: recentData.map((item) => item.date).reverse(), // Reverse dates for most recent order to the right
+    labels: recentData.map((item) => item.date), // Reverse dates for most recent order to the right
     datasets: [
       {
         label: "Total Sales (฿)",
-        data: recentData.map((item) => item.total).reverse(), // Reverse total sales to match reversed dates
+        data: recentData.map((item) => item.total), // Reverse total sales to match reversed dates
         backgroundColor: "rgba(75, 192, 192, 0.6)",
         borderColor: "rgba(75, 192, 192, 1)",
         borderWidth: 1,

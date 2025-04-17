@@ -34,7 +34,10 @@ export async function getLowStock() {
 
 export async function getAllOrder() {
   // Fetch 10 most recent orders
-  const { data, error } = await supabase.from("order").select();
+  const { data, error } = await supabase
+    .from("order")
+    .select()
+    .order("order_date", { ascending: false });
 
   console.log("Data:", data);
   console.log("Error:", error);
@@ -49,7 +52,8 @@ export async function getAllCustomer() {
 export async function getOrderDataForGraph() {
   const { data, error } = await supabase
     .from("order")
-    .select("order_date, total_price");
+    .select("order_date, total_price")
+    .order("order_date", { ascending: true });
 
   if (error) {
     console.error("Error fetching order data for graph:", error);
