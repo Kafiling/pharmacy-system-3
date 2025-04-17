@@ -45,3 +45,15 @@ export async function getAllCustomer() {
   const { data, error } = await supabase.from("customers").select();
   return data;
 }
+
+export async function getOrderDataForGraph() {
+  const { data, error } = await supabase
+    .from("order")
+    .select("order_date, total_price"); // Fetch only the required fields
+
+  if (error) {
+    console.error("Error fetching order data for graph:", error);
+    return [];
+  }
+  return data;
+}
