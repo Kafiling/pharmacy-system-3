@@ -254,70 +254,99 @@ export default async function Dashboard() {
         </Card>
       </div>
 
-      <Card className="overflow-hidden">
-        <div className="p-4 flex justify-between items-center border-b">
-          <h3 className="font-medium">Sales Overview</h3>
-          <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-pharma-600 text-white hover:bg-pharma-700"
-            >
-              Recent
-            </Button>
-            <Button variant="outline" size="sm">
-              Weekly
-            </Button>
-            <Button variant="outline" size="sm">
-              Monthly
-            </Button>
+      {/* Charts div*/}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="overflow-hidden">
+          <div className="p-4 flex justify-between items-center border-b">
+            <h3 className="font-medium">Sales Overview</h3>
+            <div className="flex space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-pharma-600 text-white hover:bg-pharma-700"
+              >
+                Recent
+              </Button>
+              <Button variant="outline" size="sm">
+                Weekly
+              </Button>
+              <Button variant="outline" size="sm">
+                Monthly
+              </Button>
+            </div>
           </div>
+          <div className="p-4">
+            <div className="h-64 w-full">
+              {/* This would be a chart component in a real implementation */}
+              <SalesBarChart data={orderDataForGraph} />
+            </div>
+          </div>
+        </Card>
+        <Card className="overflow-hidden">
+          <div className="p-4 flex justify-between items-center border-b">
+            <h3 className="font-medium">Sales Overview</h3>
+            <div className="flex space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-pharma-600 text-white hover:bg-pharma-700"
+              >
+                Recent
+              </Button>
+              <Button variant="outline" size="sm">
+                Weekly
+              </Button>
+              <Button variant="outline" size="sm">
+                Monthly
+              </Button>
+            </div>
+          </div>
+          <div className="p-4">
+            <div className="h-64 w-full">
+              {/* This would be a chart component in a real implementation */}
+              <SalesBarChart data={orderDataForGraph} />
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Summary statistics */}
+      <div className="grid grid-cols-4 gap-4 mt-4">
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground">Total Sales</p>
+          <p className="text-xl font-bold text-pharma-600">
+            ฿
+            {allorder
+              .reduce(
+                (sum: number, current: any) => sum + current.total_price,
+                0
+              )
+              .toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </p>
         </div>
-        <div className="p-4">
-          <div className="h-64 w-full">
-            {/* This would be a chart component in a real implementation */}
-            <SalesBarChart data={orderDataForGraph} />
-          </div>
-          <div className="grid grid-cols-4 gap-4 mt-4">
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">Total Sales</p>
-              <p className="text-xl font-bold text-pharma-600">
-                ฿
-                {allorder
-                  .reduce(
-                    (sum: number, current: any) => sum + current.total_price,
-                    0
-                  )
-                  .toLocaleString("en-US", { minimumFractionDigits: 2 })}
-              </p>
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">Total Customers</p>
-              <p className="text-xl font-bold text-pharma-600">
-                {allcustomer.length}
-              </p>
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">Total Orders</p>
-              <p className="text-xl font-bold text-pharma-600">
-                {allorder.length}
-              </p>
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">Avg. Order Value</p>
-              <p className="text-xl font-bold text-pharma-600">
-                ฿
-                {(
-                  allorder.reduce(
-                    (sum: number, current: any) => sum + current.total_price,
-                    0
-                  ) / allorder.length || 0
-                ).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-              </p>
-            </div>
-          </div>
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground">Total Customers</p>
+          <p className="text-xl font-bold text-pharma-600">
+            {allcustomer.length}
+          </p>
         </div>
-      </Card>
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground">Total Orders</p>
+          <p className="text-xl font-bold text-pharma-600">{allorder.length}</p>
+        </div>
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground">Avg. Order Value</p>
+          <p className="text-xl font-bold text-pharma-600">
+            ฿
+            {(
+              allorder.reduce(
+                (sum: number, current: any) => sum + current.total_price,
+                0
+              ) / allorder.length || 0
+            ).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </p>
+        </div>
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="p-4 flex flex-col items-center text-center">
