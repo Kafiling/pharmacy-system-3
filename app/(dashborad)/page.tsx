@@ -6,6 +6,7 @@ import {
   getAllCustomer,
   getAllOrder,
   getLowStock,
+  getOrderDataForGraph,
 } from "@/app/actions/dashboard";
 
 import {
@@ -17,12 +18,14 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { customers } from "@/lib/data";
+import { SalesBarChart } from "@/components/SalesBarChart";
 
 export default async function Dashboard() {
   const recentorder = (await getRecentOrder()) || [];
   const lowstock = (await getLowStock()) || [];
   const allorder = (await getAllOrder()) || [];
   const allcustomer = (await getAllCustomer()) || [];
+  const orderDataForGraph = (await getOrderDataForGraph()) || [];
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
@@ -265,57 +268,7 @@ export default async function Dashboard() {
         <div className="p-4">
           <div className="h-64 w-full">
             {/* This would be a chart component in a real implementation */}
-            <div className="flex items-end justify-between h-48 w-full px-2">
-              <div className="w-1/7 flex flex-col items-center">
-                <div
-                  className="w-12 bg-pharma-500 rounded-t-sm"
-                  style={{ height: "60%" }}
-                ></div>
-                <span className="text-xs mt-2">Mon</span>
-              </div>
-              <div className="w-1/7 flex flex-col items-center">
-                <div
-                  className="w-12 bg-pharma-500 rounded-t-sm"
-                  style={{ height: "45%" }}
-                ></div>
-                <span className="text-xs mt-2">Tue</span>
-              </div>
-              <div className="w-1/7 flex flex-col items-center">
-                <div
-                  className="w-12 bg-pharma-500 rounded-t-sm"
-                  style={{ height: "75%" }}
-                ></div>
-                <span className="text-xs mt-2">Wed</span>
-              </div>
-              <div className="w-1/7 flex flex-col items-center">
-                <div
-                  className="w-12 bg-pharma-500 rounded-t-sm"
-                  style={{ height: "40%" }}
-                ></div>
-                <span className="text-xs mt-2">Thu</span>
-              </div>
-              <div className="w-1/7 flex flex-col items-center">
-                <div
-                  className="w-12 bg-pharma-500 rounded-t-sm"
-                  style={{ height: "80%" }}
-                ></div>
-                <span className="text-xs mt-2">Fri</span>
-              </div>
-              <div className="w-1/7 flex flex-col items-center">
-                <div
-                  className="w-12 bg-pharma-500 rounded-t-sm"
-                  style={{ height: "50%" }}
-                ></div>
-                <span className="text-xs mt-2">Sat</span>
-              </div>
-              <div className="w-1/7 flex flex-col items-center">
-                <div
-                  className="w-12 bg-pharma-500 rounded-t-sm"
-                  style={{ height: "35%" }}
-                ></div>
-                <span className="text-xs mt-2">Sun</span>
-              </div>
-            </div>
+            <SalesBarChart data={orderDataForGraph} />
           </div>
           <div className="grid grid-cols-4 gap-4 mt-4">
             <div className="text-center">

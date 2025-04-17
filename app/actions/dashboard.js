@@ -49,11 +49,22 @@ export async function getAllCustomer() {
 export async function getOrderDataForGraph() {
   const { data, error } = await supabase
     .from("order")
-    .select("order_date, total_price"); // Fetch only the required fields
+    .select("order_date, total_price");
 
   if (error) {
     console.error("Error fetching order data for graph:", error);
     return [];
   }
-  return data;
+
+  // Group data by date and calculate total sales per day
+  const groupedData = data.reduce((acc, order) => {
+    const date = new Date(order.order_date).toLocaleDateString();
+    acc[date] = (acc[date] || 0) + order.total_price;
+    return acc;
+  }, {});
+
+  return Object.entries(groupedData).map(([date, total]) => ({
+    date,
+    total,
+  }));
 }
