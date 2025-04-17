@@ -17,7 +17,6 @@ import {
   Truck,
 } from "lucide-react";
 import Link from "next/link";
-import { customers } from "@/lib/data";
 import { SalesBarChart } from "@/components/SalesBarChart";
 
 export default async function Dashboard() {
@@ -33,18 +32,22 @@ export default async function Dashboard() {
         <p className="text-muted-foreground">Welcome back, Dr. Sarah</p>
       </div>
 
-      <Alert className="bg-amber-50 border-amber-200 text-amber-800">
-        <AlertTriangle className="h-4 w-4 text-amber-800" />
-        <AlertTitle className="text-amber-800 font-medium">
-          Low Stock Alert
-        </AlertTitle>
-        <AlertDescription className="text-amber-700">
-          4 medications are running low on stock.{" "}
-          <Link href="/inventory" className="text-pharma-600 font-medium">
-            View all
-          </Link>
-        </AlertDescription>
-      </Alert>
+      {/* Alert for low stock medications (Conditionally)*/}
+      {lowstock.length > 0 && (
+        <Alert className="bg-amber-50 border-amber-200 text-amber-800">
+          <AlertTriangle className="h-4 w-4 text-amber-800" />
+          <AlertTitle className="text-amber-800 font-medium">
+            Low Stock Alert
+          </AlertTitle>
+          <AlertDescription className="text-amber-700">
+            {lowstock.length} medication{lowstock.length > 1 ? "s" : ""} are
+            running low on stock.{" "}
+            <Link href="/inventory" className="text-pharma-600 font-medium">
+              View all
+            </Link>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="stat-card">
@@ -53,7 +56,9 @@ export default async function Dashboard() {
               <p className="text-sm font-medium text-muted-foreground">
                 Total Medications
               </p>
-              <h3 className="text-2xl font-bold mt-1">5</h3>
+              <h3 className="text-2xl font-bold mt-1">
+                Hello {/*Put data here*/}
+              </h3>
             </div>
             <div className="stat-icon bg-blue-100">
               <PillIcon className="h-5 w-5 text-blue-600" />
@@ -73,7 +78,9 @@ export default async function Dashboard() {
               <p className="text-sm font-medium text-muted-foreground">
                 Today's Orders
               </p>
-              <h3 className="text-2xl font-bold mt-1">4</h3>
+              <h3 className="text-2xl font-bold mt-1">
+                Hello {/*Put data here*/}
+              </h3>
             </div>
             <div className="stat-icon bg-green-100">
               <ShoppingCart className="h-5 w-5 text-green-600" />
@@ -93,16 +100,15 @@ export default async function Dashboard() {
               <p className="text-sm font-medium text-muted-foreground">
                 Low Stock Items
               </p>
-              <h3 className="text-2xl font-bold mt-1">4</h3>
+              <h3 className="text-2xl font-bold mt-1">{lowstock.length}</h3>
             </div>
             <div className="stat-icon bg-red-100">
               <AlertTriangle className="h-5 w-5 text-red-600" />
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-xs text-red-600">↑ 2 </span>
             <span className="text-xs text-muted-foreground">
-              more than yesterday
+              Please check your inventory
             </span>
           </div>
         </Card>
@@ -113,7 +119,9 @@ export default async function Dashboard() {
               <p className="text-sm font-medium text-muted-foreground">
                 Revenue (Today)
               </p>
-              <h3 className="text-2xl font-bold mt-1">$463.45</h3>
+              <h3 className="text-2xl font-bold mt-1">
+                ฿Hello {/*Put data here*/}
+              </h3>
             </div>
             <div className="stat-icon bg-purple-100">
               <svg
