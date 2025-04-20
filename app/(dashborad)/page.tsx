@@ -75,7 +75,7 @@ export default async function Dashboard() {
           </div>
           <div className="mt-2">
             <span className="text-xs text-muted-foreground">
-              types of medine in stock
+              types of medication in stock
             </span>
           </div>
         </Card>
@@ -310,7 +310,7 @@ export default async function Dashboard() {
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="overflow-hidden">
           <div className="p-4 flex justify-between items-center border-b">
-            <h3 className="font-medium">Recent Orders (10 days)</h3>
+            <h3 className="font-medium">Recent Days</h3>
           </div>
           <div className="p-4">
             <div className="h-64 w-full">
