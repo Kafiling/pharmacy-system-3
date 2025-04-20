@@ -8,6 +8,7 @@ import {
   getLowStock,
   getRecentRevenue,
   getWeeklyRevenue,
+  getMonthlyRevenue,
 } from "@/app/actions/dashboard";
 
 import {
@@ -27,6 +28,8 @@ export default async function Dashboard() {
   const allcustomer = (await getAllCustomer()) || [];
   const orderDataForGraph = (await getRecentRevenue()) || [];
   const weeklyRevenue = (await getWeeklyRevenue()) || [];
+  const monthlyRevenue = (await getMonthlyRevenue()) || [];
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
@@ -265,13 +268,15 @@ export default async function Dashboard() {
           <div className="p-4">
             <div className="h-64 w-full">
               {/* This would be a chart component in a real implementation */}
-              <SalesBarChart data={orderDataForGraph} />
+              <SalesBarChart data={orderDataForGraph.reverse()} />
             </div>
           </div>
         </Card>
         <Card className="overflow-hidden">
           <div className="p-4 flex justify-between items-center border-b">
-            <h3 className="font-medium">This Month</h3>
+            <h3 className="font-medium">
+              Month: {new Date().toLocaleString("default", { month: "long" })}
+            </h3>
           </div>
           <div className="p-4">
             <div className="h-64 w-full">
@@ -288,12 +293,17 @@ export default async function Dashboard() {
       </div>
       <Card className="overflow-hidden">
         <div className="p-4 flex justify-between items-center border-b">
-          <h3 className="font-medium">This Year</h3>
+          <h3 className="font-medium">Year: {new Date().getFullYear()}</h3>
         </div>
         <div className="p-4">
           <div className="h-64 w-full">
             {/* This would be a chart component in a real implementation */}
-            <SalesBarChart data={orderDataForGraph} />
+            <SalesBarChart
+              data={monthlyRevenue.map((item) => ({
+                date: item.month, // Month name as the label
+                total: item.total, // Total revenue for the month
+              }))}
+            />
           </div>
         </div>
       </Card>

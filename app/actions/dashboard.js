@@ -14,7 +14,7 @@ export async function getRecentOrder() {
       "order_id, employee_id, order_date, total_price, customers(firstname, lastname)"
     )
     .order("order_date", { ascending: false })
-    .limit(6);
+    .limit(5);
   console.log("Data:", data);
   console.log("Error:", error);
   return data;
@@ -53,7 +53,8 @@ export async function getRecentRevenue() {
   const { data, error } = await supabase
     .from("order")
     .select("order_date, total_price")
-    .order("order_date", { ascending: true });
+    .order("order_date", { ascending: false })
+    .limit(10);
 
   if (error) {
     console.error("Error fetching order data for graph:", error);
@@ -74,12 +75,22 @@ export async function getRecentRevenue() {
 }
 
 export async function getWeeklyRevenue() {
-  // const today = new Date();
-  // const firstDayOfLastMonth = new Date(today.getFullYear(),today.getMonth() - 1,1);
-  // const firstDayOfThisMonth = new Date(today.getFullYear(),today.getMonth(),1);
+  //Real implementation to get the first day of last month and the first day of this month
+  const today = new Date();
+  const firstDayOfLastMonth = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    1
+  );
+  const firstDayOfThisMonth = new Date(
+    today.getFullYear(),
+    today.getMonth() + 1,
+    1
+  );
 
-  const firstDayOfLastMonth = new Date(2026, 6, 1); // July 1, 2026 (month is 0-indexed)
-  const firstDayOfThisMonth = new Date(2026, 7, 1); // August 1, 2026
+  //For testing purposes, we are using a fixed date range.
+  //const firstDayOfLastMonth = new Date(2026, 6, 1); // July 1, 2026 (month is 0-indexed)
+  //const firstDayOfThisMonth = new Date(2026, 7, 1); // August 1, 2026
 
   const { data, error } = await supabase
     .from("order")
@@ -110,4 +121,34 @@ function getWeek(date) {
   const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
   const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
   return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+}
+
+export async function getMonthlyRevenue() {
+  const currentYear = new Date().getFullYear();
+  const firstDayOfYear = new Date(currentYear, 0, 1); // January 1st
+  const firstDayOfNextYear = new Date(currentYear + 1, 0, 1); // January 1st of next year
+
+  const { data, error } = await supabase
+    .from("order")
+    .select("order_date, total_price")
+    .gte("order_date", firstDayOfYear.toISOString()) // Filter from January 1st
+    .lt("order_date", firstDayOfNextYear.toISOString()); // Filter before January 1st of next year
+
+  if (error) {
+    console.error("Error fetching monthly revenue:", error);
+    return [];
+  }
+
+  // Aggregate revenue by month
+  const monthlyData = data.reduce((acc, order) => {
+    const month = new Date(order.order_date).getMonth(); // Get month (0-indexed)
+    acc[month] = (acc[month] || 0) + order.total_price;
+    return acc;
+  }, {});
+
+  // Ensure all months (Jan to Dec) are included
+  return Array.from({ length: 12 }, (_, i) => ({
+    month: new Date(currentYear, i).toLocaleString("en-US", { month: "short" }),
+    total: monthlyData[i] || 0, // Default to 0 if no data for the month
+  }));
 }

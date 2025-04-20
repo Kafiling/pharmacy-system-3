@@ -17,9 +17,9 @@ export function SalesBarChart({
 }: {
   data: { date: string; total: number }[];
 }) {
-  const recentData = data.slice(-10); // Get the most recent x days
+  const recentData = data; // don't worry about the variable name, it's outdated
   const chartData = {
-    labels: recentData.map((item) => item.date), // Reverse dates for most recent order to the right
+    labels: recentData.map((item) => item.date),
     datasets: [
       {
         label: "Total Sales (฿)",
@@ -51,8 +51,8 @@ export function SalesBarChart({
       },
       y: {
         title: {
-          display: true,
-          text: "Value of Dispensed Good (THB)",
+          display: false,
+          text: "Total Sales (฿)",
         },
         beginAtZero: true,
         grid: {
@@ -61,6 +61,7 @@ export function SalesBarChart({
         },
         ticks: {
           maxTicksLimit: 6, // Limit the number of steps to 5
+          callback: (value) => `฿${value.toLocaleString()}`, // Format the y-axis labels with currency
         },
       },
     },
