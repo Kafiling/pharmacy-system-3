@@ -403,35 +403,41 @@ export default async function Dashboard() {
           <p className="text-sm text-muted-foreground mb-4">
             Create a new customer order
           </p>
-          <Button variant="outline" className="w-full">
-            Create
-          </Button>
+          <a href="/orders">
+            <Button variant="outline" className="w-full">
+              Create
+            </Button>
+          </a>
         </Card>
 
         <Card className="p-4 flex flex-col items-center text-center">
           <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center mb-4">
             <PillIcon className="h-6 w-6 text-green-600" />
           </div>
-          <h3 className="font-medium mb-1">Add Medication</h3>
+          <h3 className="font-medium mb-1">Manage inventory</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Add new medication to inventory
+            Add, edit, or remove medications
           </p>
-          <Button variant="outline" className="w-full">
-            Add
-          </Button>
+          <a href="/inventory">
+            <Button variant="outline" className="w-full">
+              Manage
+            </Button>
+          </a>
         </Card>
 
         <Card className="p-4 flex flex-col items-center text-center">
           <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center mb-4">
             <Truck className="h-6 w-6 text-purple-600" />
           </div>
-          <h3 className="font-medium mb-1">Order Supplies</h3>
+          <h3 className="font-medium mb-1">Open Supplier List</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Place orders with suppliers
+            View and manage suppliers
           </p>
-          <Button variant="outline" className="w-full">
-            Order
-          </Button>
+          <a href="/suppliers">
+            <Button variant="outline" className="w-full">
+              View
+            </Button>
+          </a>
         </Card>
 
         <Card className="p-4 flex flex-col items-center text-center">
@@ -442,9 +448,11 @@ export default async function Dashboard() {
           <p className="text-sm text-muted-foreground mb-4">
             Create inventory and sales reports
           </p>
-          <Button variant="outline" className="w-full">
-            Generate
-          </Button>
+          <a>
+            <Button variant="outline" className="w-full">
+              Generate
+            </Button>
+          </a>
         </Card>
       </div>
     </div>
