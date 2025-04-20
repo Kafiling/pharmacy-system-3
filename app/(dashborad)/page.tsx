@@ -74,9 +74,8 @@ export default async function Dashboard() {
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-xs text-green-600">{totalMedicineCount}</span>
             <span className="text-xs text-muted-foreground">
-              from last month
+              types of medine in stock
             </span>
           </div>
         </Card>
