@@ -314,7 +314,6 @@ export default async function Dashboard() {
           </div>
           <div className="p-4">
             <div className="h-64 w-full">
-              {/* This would be a chart component in a real implementation */}
               <SalesBarChart data={orderDataForGraph.reverse()} />
             </div>
           </div>
@@ -327,7 +326,6 @@ export default async function Dashboard() {
           </div>
           <div className="p-4">
             <div className="h-64 w-full">
-              {/* This would be a chart component in a real implementation */}
               <SalesBarChart
                 data={weeklyRevenue.map((item, index) => ({
                   date: `Week ${index + 1}`,
@@ -344,7 +342,6 @@ export default async function Dashboard() {
         </div>
         <div className="p-4">
           <div className="h-64 w-full">
-            {/* This would be a chart component in a real implementation */}
             <SalesBarChart
               data={monthlyRevenue.map((item) => ({
                 date: item.month, // Month name as the label
