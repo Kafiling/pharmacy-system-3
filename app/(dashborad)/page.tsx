@@ -96,8 +96,28 @@ export default async function Dashboard() {
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-xs text-green-600">
-              {yesterdaysOrders.orderCount}
+            <span
+              className={`text-xs ${
+                ((todaysOrders.orderCount - yesterdaysOrders.orderCount) /
+                  yesterdaysOrders.orderCount) *
+                  100 >
+                0
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
+            >
+              {((todaysOrders.orderCount - yesterdaysOrders.orderCount) /
+                yesterdaysOrders.orderCount) *
+                100 >
+              0
+                ? "+"
+                : ""}
+              {(
+                ((todaysOrders.orderCount - yesterdaysOrders.orderCount) /
+                  yesterdaysOrders.orderCount) *
+                100
+              ).toFixed(2)}
+              %{" "}
             </span>
             <span className="text-xs text-muted-foreground">
               from yesterday
