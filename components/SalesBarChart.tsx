@@ -61,7 +61,7 @@ export function SalesBarChart({
         },
         ticks: {
           maxTicksLimit: 6, // Limit the number of steps to 5
-          callback: (value) => `฿${value.toLocaleString()}`, // Format the y-axis labels with currency
+          callback: (value: any) => `฿${value.toLocaleString()}`, // Format the y-axis labels with currency
         },
       },
     },

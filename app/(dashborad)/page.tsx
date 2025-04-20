@@ -9,6 +9,9 @@ import {
   getRecentRevenue,
   getWeeklyRevenue,
   getMonthlyRevenue,
+  getTotalMedicineCount,
+  getTodaysOrdersAndRevenue,
+  getYesterdaysOrdersAndRevenue,
 } from "@/app/actions/dashboard";
 
 import {
@@ -29,6 +32,9 @@ export default async function Dashboard() {
   const orderDataForGraph = (await getRecentRevenue()) || [];
   const weeklyRevenue = (await getWeeklyRevenue()) || [];
   const monthlyRevenue = (await getMonthlyRevenue()) || [];
+  const totalMedicineCount = (await getTotalMedicineCount()) || 0;
+  const todaysOrders = (await getTodaysOrdersAndRevenue()) || 0;
+  const yesterdaysOrders = (await getYesterdaysOrdersAndRevenue()) || 0;
 
   return (
     <div className="flex flex-col gap-4">
@@ -61,16 +67,14 @@ export default async function Dashboard() {
               <p className="text-sm font-medium text-muted-foreground">
                 Total Medications
               </p>
-              <h3 className="text-2xl font-bold mt-1">
-                Hello {/*Put data here*/}
-              </h3>
+              <h3 className="text-2xl font-bold mt-1">{totalMedicineCount}</h3>
             </div>
             <div className="stat-icon bg-blue-100">
               <PillIcon className="h-5 w-5 text-blue-600" />
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-xs text-green-600">↑ 3.2% </span>
+            <span className="text-xs text-green-600">{totalMedicineCount}</span>
             <span className="text-xs text-muted-foreground">
               from last month
             </span>
@@ -84,7 +88,7 @@ export default async function Dashboard() {
                 Today's Orders
               </p>
               <h3 className="text-2xl font-bold mt-1">
-                Hello {/*Put data here*/}
+                {todaysOrders.orderCount}
               </h3>
             </div>
             <div className="stat-icon bg-green-100">
@@ -92,7 +96,9 @@ export default async function Dashboard() {
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-xs text-green-600">↑ 12% </span>
+            <span className="text-xs text-green-600">
+              {yesterdaysOrders.orderCount}
+            </span>
             <span className="text-xs text-muted-foreground">
               from yesterday
             </span>
@@ -125,7 +131,7 @@ export default async function Dashboard() {
                 Revenue (Today)
               </p>
               <h3 className="text-2xl font-bold mt-1">
-                ฿Hello {/*Put data here*/}
+                ฿{todaysOrders.totalRevenue.toLocaleString("en-US")}
               </h3>
             </div>
             <div className="stat-icon bg-purple-100">
@@ -145,7 +151,29 @@ export default async function Dashboard() {
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-xs text-green-600">↑ 8.1% </span>
+            <span
+              className={`text-xs ${
+                ((todaysOrders.totalRevenue - yesterdaysOrders.totalRevenue) /
+                  yesterdaysOrders.totalRevenue) *
+                  100 >
+                0
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
+            >
+              {((todaysOrders.totalRevenue - yesterdaysOrders.totalRevenue) /
+                yesterdaysOrders.totalRevenue) *
+                100 >
+              0
+                ? "+"
+                : ""}
+              {(
+                ((todaysOrders.totalRevenue - yesterdaysOrders.totalRevenue) /
+                  yesterdaysOrders.totalRevenue) *
+                100
+              ).toFixed(2)}
+              %{" "}
+            </span>
             <span className="text-xs text-muted-foreground">
               from yesterday
             </span>

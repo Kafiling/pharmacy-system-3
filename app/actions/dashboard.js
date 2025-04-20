@@ -152,3 +152,75 @@ export async function getMonthlyRevenue() {
     total: monthlyData[i] || 0, // Default to 0 if no data for the month
   }));
 }
+
+export async function getTotalMedicineCount() {
+  const { data, error, count } = await supabase
+    .from("medicine")
+    .select("*", { count: "exact" }); // Use `count: "exact"` to get the total count
+
+  if (error) {
+    console.error("Error fetching total medicine count:", error);
+    return 0; // Return 0 if there's an error
+  }
+
+  return count || 0; // Return the count or 0 if undefined
+}
+
+export async function getTodaysOrdersAndRevenue() {
+  const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1); // Calculate tomorrow's date
+
+  console.log("Today:", today);
+  console.log("Tomorrow:", tomorrow.toISOString().split("T")[0]);
+
+  const { data, error } = await supabase
+    .from("order")
+    .select("total_price") // Select only the total_price column
+    .gte("order_date", today) // Filter orders from today
+    .lt("order_date", tomorrow.toISOString().split("T")[0]); // Filter before tomorrow
+
+  if (error) {
+    console.error("Error fetching today's orders and revenue:", error);
+    return { orderCount: 0, totalRevenue: 0 }; // Return 0 for both in case of an error
+  }
+
+  const orderCount = data.length; // Count the number of orders
+  const totalRevenue = data.reduce((sum, order) => sum + order.total_price, 0); // Sum up the total_price
+
+  console.log("Today's Orders Count:", orderCount);
+  console.log("Today's Revenue:", totalRevenue);
+
+  return { orderCount, totalRevenue };
+}
+
+export async function getYesterdaysOrdersAndRevenue() {
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1); // Calculate yesterday's date
+
+  const startOfYesterday = yesterday.toISOString().split("T")[0]; // Start of yesterday in YYYY-MM-DD format
+  const startOfToday = today.toISOString().split("T")[0]; // Start of today in YYYY-MM-DD format
+
+  console.log("Yesterday:", startOfYesterday);
+  console.log("Today:", startOfToday);
+
+  const { data, error } = await supabase
+    .from("order")
+    .select("total_price") // Select only the total_price column
+    .gte("order_date", startOfYesterday) // Filter orders from yesterday
+    .lt("order_date", startOfToday); // Filter before today
+
+  if (error) {
+    console.error("Error fetching yesterday's orders and revenue:", error);
+    return { orderCount: 0, totalRevenue: 0 }; // Return 0 for both in case of an error
+  }
+
+  const orderCount = data.length; // Count the number of orders
+  const totalRevenue = data.reduce((sum, order) => sum + order.total_price, 0); // Sum up the total_price
+
+  console.log("Yesterday's Orders Count:", orderCount);
+  console.log("Yesterday's Revenue:", totalRevenue);
+
+  return { orderCount, totalRevenue };
+}
