@@ -110,7 +110,7 @@ export async function POST(req) {
       );
       drawTextOnPage(
         firstPage,
-        orderDetail.medicine.price.toFixed(2),
+        (orderDetail.medicine.price * orderDetail.quantity).toFixed(2),
         465,
         yPosition,
         thSarabunFont,
