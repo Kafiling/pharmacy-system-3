@@ -26,7 +26,7 @@ export async function getLowStock() {
     .select(
       "stock_id, quantity_in_stock, medicine(medicine_name, categories_id), supplier(supplier_id, supplier_name)"
     )
-    .lt("quantity_in_stock", 50);
+    .lt("quantity_in_stock", 100);
   console.log("Low Stock Data:", data);
   console.log("Low Stock Error:", error);
   return data;
