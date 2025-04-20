@@ -6,6 +6,7 @@ const supabase = createClient(
 );
 
 export async function getAllStock() {
+
   const { data, error } = await supabase.from("stock").select(
     `
     stock_id,
@@ -24,6 +25,7 @@ export async function getAllStock() {
     )
   `
   );
+
   console.log("Data:", data);
   console.log("Error:", error);
   return data;
