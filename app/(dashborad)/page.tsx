@@ -2,6 +2,19 @@ import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
+  getRecentOrder,
+  getAllCustomer,
+  getAllOrder,
+  getLowStock,
+  getRecentRevenue,
+  getWeeklyRevenue,
+  getMonthlyRevenue,
+  getTotalMedicineCount,
+  getTodaysOrdersAndRevenue,
+  getYesterdaysOrdersAndRevenue,
+} from "@/app/actions/dashboard";
+
+import {
   AlertTriangle,
   FileText,
   PillIcon,
@@ -9,8 +22,20 @@ import {
   Truck,
 } from "lucide-react";
 import Link from "next/link";
+import { SalesBarChart } from "@/components/SalesBarChart";
 
-export default function Dashboard() {
+export default async function Dashboard() {
+  const recentorder = (await getRecentOrder()) || [];
+  const lowstock = (await getLowStock()) || [];
+  const allorder = (await getAllOrder()) || [];
+  const allcustomer = (await getAllCustomer()) || [];
+  const orderDataForGraph = (await getRecentRevenue()) || [];
+  const weeklyRevenue = (await getWeeklyRevenue()) || [];
+  const monthlyRevenue = (await getMonthlyRevenue()) || [];
+  const totalMedicineCount = (await getTotalMedicineCount()) || 0;
+  const todaysOrders = (await getTodaysOrdersAndRevenue()) || 0;
+  const yesterdaysOrders = (await getYesterdaysOrdersAndRevenue()) || 0;
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
@@ -18,18 +43,22 @@ export default function Dashboard() {
         <p className="text-muted-foreground">Welcome back, Dr. Sarah</p>
       </div>
 
-      <Alert className="bg-amber-50 border-amber-200 text-amber-800">
-        <AlertTriangle className="h-4 w-4 text-amber-800" />
-        <AlertTitle className="text-amber-800 font-medium">
-          Low Stock Alert
-        </AlertTitle>
-        <AlertDescription className="text-amber-700">
-          4 medications are running low on stock.{" "}
-          <Link href="/inventory" className="text-pharma-600 font-medium">
-            View all
-          </Link>
-        </AlertDescription>
-      </Alert>
+      {/* Alert for low stock medications (Conditionally)*/}
+      {lowstock.length > 0 && (
+        <Alert className="bg-amber-50 border-amber-200 text-amber-800">
+          <AlertTriangle className="h-4 w-4 text-amber-800" />
+          <AlertTitle className="text-amber-800 font-medium">
+            Low Stock Alert
+          </AlertTitle>
+          <AlertDescription className="text-amber-700">
+            {lowstock.length} medication{lowstock.length > 1 ? "s" : ""} are
+            running low on stock.{" "}
+            <Link href="/inventory" className="text-pharma-600 font-medium">
+              View all
+            </Link>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="stat-card">
@@ -38,16 +67,15 @@ export default function Dashboard() {
               <p className="text-sm font-medium text-muted-foreground">
                 Total Medications
               </p>
-              <h3 className="text-2xl font-bold mt-1">5</h3>
+              <h3 className="text-2xl font-bold mt-1">{totalMedicineCount}</h3>
             </div>
             <div className="stat-icon bg-blue-100">
               <PillIcon className="h-5 w-5 text-blue-600" />
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-xs text-green-600">↑ 3.2% </span>
             <span className="text-xs text-muted-foreground">
-              from last month
+              types of medication in stock
             </span>
           </div>
         </Card>
@@ -58,14 +86,38 @@ export default function Dashboard() {
               <p className="text-sm font-medium text-muted-foreground">
                 Today's Orders
               </p>
-              <h3 className="text-2xl font-bold mt-1">4</h3>
+              <h3 className="text-2xl font-bold mt-1">
+                {todaysOrders.orderCount}
+              </h3>
             </div>
             <div className="stat-icon bg-green-100">
               <ShoppingCart className="h-5 w-5 text-green-600" />
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-xs text-green-600">↑ 12% </span>
+            <span
+              className={`text-xs ${
+                ((todaysOrders.orderCount - yesterdaysOrders.orderCount) /
+                  yesterdaysOrders.orderCount) *
+                  100 >
+                0
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
+            >
+              {((todaysOrders.orderCount - yesterdaysOrders.orderCount) /
+                yesterdaysOrders.orderCount) *
+                100 >
+              0
+                ? "+"
+                : ""}
+              {(
+                ((todaysOrders.orderCount - yesterdaysOrders.orderCount) /
+                  yesterdaysOrders.orderCount) *
+                100
+              ).toFixed(2)}
+              %{" "}
+            </span>
             <span className="text-xs text-muted-foreground">
               from yesterday
             </span>
@@ -78,16 +130,15 @@ export default function Dashboard() {
               <p className="text-sm font-medium text-muted-foreground">
                 Low Stock Items
               </p>
-              <h3 className="text-2xl font-bold mt-1">4</h3>
+              <h3 className="text-2xl font-bold mt-1">{lowstock.length}</h3>
             </div>
             <div className="stat-icon bg-red-100">
               <AlertTriangle className="h-5 w-5 text-red-600" />
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-xs text-red-600">↑ 2 </span>
             <span className="text-xs text-muted-foreground">
-              more than yesterday
+              Please check your inventory
             </span>
           </div>
         </Card>
@@ -98,7 +149,9 @@ export default function Dashboard() {
               <p className="text-sm font-medium text-muted-foreground">
                 Revenue (Today)
               </p>
-              <h3 className="text-2xl font-bold mt-1">$463.45</h3>
+              <h3 className="text-2xl font-bold mt-1">
+                ฿{todaysOrders.totalRevenue.toLocaleString("en-US")}
+              </h3>
             </div>
             <div className="stat-icon bg-purple-100">
               <svg
@@ -117,7 +170,29 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-xs text-green-600">↑ 8.1% </span>
+            <span
+              className={`text-xs ${
+                ((todaysOrders.totalRevenue - yesterdaysOrders.totalRevenue) /
+                  yesterdaysOrders.totalRevenue) *
+                  100 >
+                0
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
+            >
+              {((todaysOrders.totalRevenue - yesterdaysOrders.totalRevenue) /
+                yesterdaysOrders.totalRevenue) *
+                100 >
+              0
+                ? "+"
+                : ""}
+              {(
+                ((todaysOrders.totalRevenue - yesterdaysOrders.totalRevenue) /
+                  yesterdaysOrders.totalRevenue) *
+                100
+              ).toFixed(2)}
+              %{" "}
+            </span>
             <span className="text-xs text-muted-foreground">
               from yesterday
             </span>
@@ -139,72 +214,27 @@ export default function Dashboard() {
                 <tr className="text-xs text-left text-muted-foreground bg-muted/50">
                   <th className="px-4 py-3 font-medium">Order ID</th>
                   <th className="px-4 py-3 font-medium">Customer</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium">Amount</th>
+                  <th className="px-4 py-3 font-medium">Employee</th>
+                  <th className="px-4 py-3 font-medium">Price</th>
                   <th className="px-4 py-3 font-medium">Time</th>
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b">
-                  <td className="px-4 py-3 text-sm text-pharma-600">
-                    ORD-5392
-                  </td>
-                  <td className="px-4 py-3 text-sm">Unknown</td>
-                  <td className="px-4 py-3 text-sm">
-                    <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-                      Completed
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm">$125.00</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">
-                    10:07 PM
-                  </td>
-                </tr>
-                <tr className="border-b">
-                  <td className="px-4 py-3 text-sm text-pharma-600">
-                    ORD-5391
-                  </td>
-                  <td className="px-4 py-3 text-sm">Unknown</td>
-                  <td className="px-4 py-3 text-sm">
-                    <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                      Processing
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm">$78.50</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">
-                    10:07 PM
-                  </td>
-                </tr>
-                <tr className="border-b">
-                  <td className="px-4 py-3 text-sm text-pharma-600">
-                    ORD-5390
-                  </td>
-                  <td className="px-4 py-3 text-sm">Unknown</td>
-                  <td className="px-4 py-3 text-sm">
-                    <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-                      Completed
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm">$214.75</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">
-                    10:07 PM
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-3 text-sm text-pharma-600">
-                    ORD-5389
-                  </td>
-                  <td className="px-4 py-3 text-sm">Unknown</td>
-                  <td className="px-4 py-3 text-sm">
-                    <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
-                      Pending
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm">$45.20</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">
-                    10:07 PM
-                  </td>
-                </tr>
+                {recentorder.map((order: any) => (
+                  <tr key={order.order_id} className="border-b">
+                    <td className="px-4 py-3 text-sm text-pharma-600">
+                      {order.order_id}
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      {order.customers.firstname} {order.customers.lastname}
+                    </td>
+                    <td className="px-4 py-3 text-sm">{order.employee_id}</td>
+                    <td className="px-4 py-3 text-sm">
+                      ฿{order.total_price.toFixed(2)}
+                    </td>
+                    <td className="px-4 py-3 text-sm">{order.order_date}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -227,245 +257,139 @@ export default function Dashboard() {
                 <tr className="text-xs text-left text-muted-foreground bg-muted/50">
                   <th className="px-4 py-3 font-medium">Name</th>
                   <th className="px-4 py-3 font-medium">Stock</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium">Supplier ID</th>
                   <th className="px-4 py-3 font-medium">Supplier</th>
                   <th className="px-4 py-3 font-medium">Action</th>
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center">
-                      <div className="h-8 w-8 flex items-center justify-center bg-blue-100 rounded-md mr-2">
-                        <PillIcon className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="font-medium text-sm">Amoxicillin</div>
-                        <div className="text-xs text-muted-foreground">
-                          500mg
+                {lowstock.map((stock: any) => (
+                  <tr key={stock.stock_id} className="border-b">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center">
+                        <div className="h-8 w-8 flex items-center justify-center bg-blue-100 rounded-md mr-2">
+                          <PillIcon className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-sm">
+                            {stock.medicine.medicine_name}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Type {stock.medicine.categories_id}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <div>10 boxes</div>
-                    <div className="text-xs text-muted-foreground">
-                      Min: 20 boxes
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="badge-critical">Critical</span>
-                  </td>
-                  <td className="px-4 py-3 text-sm">Unknown</td>
-                  <td className="px-4 py-3 text-sm">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-pharma-600 hover:text-pharma-700 hover:bg-pharma-50"
-                    >
-                      Order
-                    </Button>
-                  </td>
-                </tr>
-                <tr className="border-b">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center">
-                      <div className="h-8 w-8 flex items-center justify-center bg-blue-100 rounded-md mr-2">
-                        <PillIcon className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="font-medium text-sm">Lisinopril</div>
-                        <div className="text-xs text-muted-foreground">
-                          10mg
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <div>8 bottles</div>
-                    <div className="text-xs text-muted-foreground">
-                      Min: 15 bottles
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="badge-low">Low</span>
-                  </td>
-                  <td className="px-4 py-3 text-sm">Unknown</td>
-                  <td className="px-4 py-3 text-sm">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-pharma-600 hover:text-pharma-700 hover:bg-pharma-50"
-                    >
-                      Order
-                    </Button>
-                  </td>
-                </tr>
-                <tr className="border-b">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center">
-                      <div className="h-8 w-8 flex items-center justify-center bg-blue-100 rounded-md mr-2">
-                        <PillIcon className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="font-medium text-sm">Atorvastatin</div>
-                        <div className="text-xs text-muted-foreground">
-                          20mg
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <div>12 boxes</div>
-                    <div className="text-xs text-muted-foreground">
-                      Min: 25 boxes
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="badge-critical">Critical</span>
-                  </td>
-                  <td className="px-4 py-3 text-sm">Unknown</td>
-                  <td className="px-4 py-3 text-sm">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-pharma-600 hover:text-pharma-700 hover:bg-pharma-50"
-                    >
-                      Order
-                    </Button>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center">
-                      <div className="h-8 w-8 flex items-center justify-center bg-blue-100 rounded-md mr-2">
-                        <PillIcon className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="font-medium text-sm">Metformin</div>
-                        <div className="text-xs text-muted-foreground">
-                          850mg
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <div>15 bottles</div>
-                    <div className="text-xs text-muted-foreground">
-                      Min: 30 bottles
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="badge-critical">Critical</span>
-                  </td>
-                  <td className="px-4 py-3 text-sm">Unknown</td>
-                  <td className="px-4 py-3 text-sm">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-pharma-600 hover:text-pharma-700 hover:bg-pharma-50"
-                    >
-                      Order
-                    </Button>
-                  </td>
-                </tr>
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      <div>{stock.quantity_in_stock} units</div>
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      {stock.supplier.supplier_id}
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      {stock.supplier.supplier_name}
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-pharma-600 hover:text-pharma-700 hover:bg-pharma-50"
+                      >
+                        Order
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
         </Card>
       </div>
 
+      {/* Charts div*/}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="overflow-hidden">
+          <div className="p-4 flex justify-between items-center border-b">
+            <h3 className="font-medium">Recent Days</h3>
+          </div>
+          <div className="p-4">
+            <div className="h-64 w-full">
+              <SalesBarChart data={orderDataForGraph.reverse()} />
+            </div>
+          </div>
+        </Card>
+        <Card className="overflow-hidden">
+          <div className="p-4 flex justify-between items-center border-b">
+            <h3 className="font-medium">
+              Month: {new Date().toLocaleString("default", { month: "long" })}
+            </h3>
+          </div>
+          <div className="p-4">
+            <div className="h-64 w-full">
+              <SalesBarChart
+                data={weeklyRevenue.map((item, index) => ({
+                  date: `Week ${index + 1}`,
+                  total: item.total,
+                }))}
+              />
+            </div>
+          </div>
+        </Card>
+      </div>
       <Card className="overflow-hidden">
         <div className="p-4 flex justify-between items-center border-b">
-          <h3 className="font-medium">Sales Overview</h3>
-          <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-pharma-600 text-white hover:bg-pharma-700"
-            >
-              Weekly
-            </Button>
-            <Button variant="outline" size="sm">
-              Monthly
-            </Button>
-            <Button variant="outline" size="sm">
-              Yearly
-            </Button>
-          </div>
+          <h3 className="font-medium">Year: {new Date().getFullYear()}</h3>
         </div>
         <div className="p-4">
           <div className="h-64 w-full">
-            {/* This would be a chart component in a real implementation */}
-            <div className="flex items-end justify-between h-48 w-full px-2">
-              <div className="w-1/7 flex flex-col items-center">
-                <div
-                  className="w-12 bg-pharma-500 rounded-t-sm"
-                  style={{ height: "60%" }}
-                ></div>
-                <span className="text-xs mt-2">Mon</span>
-              </div>
-              <div className="w-1/7 flex flex-col items-center">
-                <div
-                  className="w-12 bg-pharma-500 rounded-t-sm"
-                  style={{ height: "45%" }}
-                ></div>
-                <span className="text-xs mt-2">Tue</span>
-              </div>
-              <div className="w-1/7 flex flex-col items-center">
-                <div
-                  className="w-12 bg-pharma-500 rounded-t-sm"
-                  style={{ height: "75%" }}
-                ></div>
-                <span className="text-xs mt-2">Wed</span>
-              </div>
-              <div className="w-1/7 flex flex-col items-center">
-                <div
-                  className="w-12 bg-pharma-500 rounded-t-sm"
-                  style={{ height: "40%" }}
-                ></div>
-                <span className="text-xs mt-2">Thu</span>
-              </div>
-              <div className="w-1/7 flex flex-col items-center">
-                <div
-                  className="w-12 bg-pharma-500 rounded-t-sm"
-                  style={{ height: "80%" }}
-                ></div>
-                <span className="text-xs mt-2">Fri</span>
-              </div>
-              <div className="w-1/7 flex flex-col items-center">
-                <div
-                  className="w-12 bg-pharma-500 rounded-t-sm"
-                  style={{ height: "50%" }}
-                ></div>
-                <span className="text-xs mt-2">Sat</span>
-              </div>
-              <div className="w-1/7 flex flex-col items-center">
-                <div
-                  className="w-12 bg-pharma-500 rounded-t-sm"
-                  style={{ height: "35%" }}
-                ></div>
-                <span className="text-xs mt-2">Sun</span>
-              </div>
-            </div>
+            <SalesBarChart
+              data={monthlyRevenue.map((item) => ({
+                date: item.month, // Month name as the label
+                total: item.total, // Total revenue for the month
+              }))}
+            />
           </div>
-          <div className="grid grid-cols-4 gap-4 mt-4">
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">Total Sales</p>
-              <p className="text-xl font-bold text-pharma-600">$42,389</p>
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">Customers</p>
-              <p className="text-xl font-bold text-pharma-600">1,852</p>
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">Orders</p>
-              <p className="text-xl font-bold text-pharma-600">3,426</p>
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">Avg. Order Value</p>
-              <p className="text-xl font-bold text-pharma-600">$64.25</p>
-            </div>
+        </div>
+      </Card>
+
+      {/* Summary statistics */}
+      <Card className="p-4">
+        <div className="grid grid-cols-4 gap-4">
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">Total Sales</p>
+            <p className="text-xl font-bold text-pharma-600">
+              ฿
+              {allorder
+                .reduce(
+                  (sum: number, current: any) => sum + current.total_price,
+                  0
+                )
+                .toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            </p>
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">Total Customers</p>
+            <p className="text-xl font-bold text-pharma-600">
+              {allcustomer.length}
+            </p>
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">Total Orders</p>
+            <p className="text-xl font-bold text-pharma-600">
+              {allorder.length}
+            </p>
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">Avg. Order Value</p>
+            <p className="text-xl font-bold text-pharma-600">
+              ฿
+              {(
+                allorder.reduce(
+                  (sum: number, current: any) => sum + current.total_price,
+                  0
+                ) / allorder.length || 0
+              ).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            </p>
           </div>
         </div>
       </Card>
