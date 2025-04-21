@@ -1,6 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { getOrder, updateOrder, addOrder, deleteOrder } from "@/app/actions/order"
+import { getOrderDetails, addOrderDetails } from "@/app/actions/order_details"
+import { getCustomer } from "@/app/actions/customer"
+import { useState, useEffect } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   DropdownMenu,
@@ -28,11 +31,45 @@ import { Badge } from "@/components/ui/badge"
 import { orders, type Order, type OrderStatus, medicines, customers } from "@/lib/data"
 import { Textarea } from "@/components/ui/textarea"
 
+// set type (Draft order object)
+interface Orders {
+  order_id: string;
+  customer_id: string;
+  employee_id: string;
+  order_date: Date;
+  total_price: Float16Array;
+}
+
+interface OrderDetails {
+  order_detail_id: string;
+  order_id: string;
+  medicine_id: string;
+  quantity: Int16Array;
+  payment: string;
+}
+
 export default function OrdersPage() {
   const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
-  const [viewOrderDetails, setViewOrderDetails] = useState(false)
+  const [orderData, setOrderData] = useState<Orders[]>([]);
+  const [orderDetailData, setOrderDetailData] = useState<OrderDetails[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [isDialogOpen, setDialogOpen] = useState(false); // State for add dialog open/close
+  const [isEditDialogOpen, setEditDialogOpen] = useState(false); // State for edit dialog open/close
+
+  const [newMedicineID, setNewMedicineID] = useState(""); // edit to other data 
+  const [newPayment, setPayment] = useState("");
+  const [newQuantity, setNewQuantity] = useState("");
+  const [newOrderDate, setNewOrderDate] = useState("");
+  const [newCustomerID, setNewCustomerID] = useState("");
+  const [newEmployeeID, setNewEmployeeID] = useState("");
+  const [newTotalPrice, setNewTotalPrice] = useState("");
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+// add new
+  const [statusFilter, setStatusFilter] = useState("");
+
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [orderCounts, setOrderCounts] = useState<Array<{ customer_id: string; order_count: number }>>([]);
 
   // Filter orders
   const filteredOrders = orders.filter(
@@ -56,6 +93,143 @@ export default function OrdersPage() {
         return "outline"
     }
   }
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const orderFromDb = await getOrder();
+        const orderDetailsFromDB = await getOrderDetails();
+        // const orderCountsFromDb = await getOrderCount(orderFromDb.order_id);
+
+        if (orderFromDb && orderDetailsFromDB) { // && orderCountsFromDb
+          setOrderData(orderFromDb as Orders[]);
+          // setOrderCounts(orderCountsFromDb);
+        } else {
+          setError(new Error("Failed to fetch data from database."));
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('An unexpected error occurred'));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const refreshOrderList = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const orderFromDb = await getOrder();
+      const orderDetailFromDB = await getOrderDetails();
+      // const orderCountsFromDb = await getOrderCountsByCustomer();
+
+      if (orderFromDb && orderDetailFromDB) {
+        setOrderData(orderFromDb as Orders[]);
+        setOrderDetailData(orderDetailFromDB as OrderDetails[]);
+        // setOrderCounts(orderCountsFromDb);
+      } else {
+        setError(new Error("Failed to fetch data from database."));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('An unexpected error occurred'));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleAddOrderDetails = async () => {
+    setSubmissionError(null);
+    if (!newMedicineID || !newQuantity || !newPayment) {
+      setSubmissionError("Please fill in all required fields.");
+      return;
+    }
+
+    const orderData = {
+      customer_id: newCustomerID,    
+      employee_id: newEmployeeID,
+      order_date: newOrderDate,
+      total_price: newTotalPrice,
+      order_id: generateOrderID(),
+    };
+
+    const orderDetail = {
+      medicine_id: newMedicineID,
+      quantity: newQuantity,
+      payment: newPayment,
+      order_id: generateOrderID(),
+      order_detail_id: generateOrderDetailID(),
+    }
+
+    try {
+      const result = await addOrder(orderData);
+      if (result.error) {
+        setSubmissionError(`Failed to add customer: ${result.error.message || 'Unknown error'}`);
+      } else {
+        setDialogOpen(false);
+        setNewOrderDate("");
+        setNewCustomerID("");
+        setNewEmployeeID("");
+        setNewTotalPrice("");
+        refreshOrderList();
+      }
+    } catch (err) {
+      setSubmissionError("An unexpected error occurred while adding order.");
+    }
+
+    try {
+      const result = await addOrderDetails(orderDetailData);
+      if (result.error) {
+        setSubmissionError(`Failed to add customer: ${result.error.message || 'Unknown error'}`);
+      } else {
+        setDialogOpen(false);
+        setNewTotalPrice("");
+        setNewMedicineID("");
+        setNewQuantity("");
+        refreshOrderList();
+      }
+    } catch (err) {
+      setSubmissionError("An unexpected error occurred while adding order.");
+    }
+  };
+
+  const generateOrderID = () => {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
+  };
+
+  const generateOrderDetailID = () => {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
+  };
+
+  const filteredCustomers = orderData.filter(
+    (order) =>
+      `${customer.firstname} ${customer.lastname}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.email.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  const getOrderCount = (order_id: string) => {
+    const count = orderCounts.find(item => item.customer_id === order_id)?.order_count || 0;
+    return count;
+  };
+
+  const handleDeleteCustomer = async (order_id: string) => {
+    setDeleteError(null);
+    try {
+      const result = await deleteOrder(order_id);
+      if (result.error) {
+        setDeleteError(`Failed to delete order: ${result.error.message || 'Unknown error'}`);
+        console.error("Delete failed:", result.error);
+      } else {
+        refreshOrderList();
+        console.log("Order deleted successfully");
+      }
+    } catch (err) {
+      setDeleteError("An unexpected error occurred while deleting the order.");
+      console.error("Unexpected delete error:", err);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4">
