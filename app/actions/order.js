@@ -8,27 +8,33 @@ const supabase = createClient(
 export async function getOrder() {
   const { data, error } = await supabase
     .from("order")
-    .select("order_id, customer_id, employee_id, order_date, total_price");
+    .select(`
+      order_id,
+      status,
+      customer_id,
+      employee_id,
+      order_date,
+      total_price,
+      customer:customer_id (
+        firstname,
+        lastname
+      )
+    `);
 
   if (error) {
-    console.error("Error fetching order:", error);
-    return;
+    console.error("Error fetching orders:", error);
+    return [];
   }
 
-  if (data) {
-    console.log("Orders:");
-    data.forEach((order) => {
-      console.log("Order ID:", order.order_id);
-      console.log("Customer ID:", order.customer_id);
-      console.log("Employee ID:", order.employee_id);
-      console.log("Order Date:", order.order_date);
-      console.log("Total Price:", order.total_price);
-      console.log("-----");
-    });
-  }
+  // Enrich the orders with customerName
+  const enrichedOrders = data.map(order => ({
+    ...order,
+    customerName: `${order.customer?.firstname ?? ""} ${order.customer?.lastname ?? ""}`.trim()
+  }));
 
-  return data;
+  return enrichedOrders;
 }
+
 
 export async function addOrder(orderData) {
   const { data, error } = await supabase.from("order").insert([orderData]);
@@ -49,7 +55,7 @@ export async function deleteOrder(order_id) {
       return { error: { message: "Failed to delete order from database." } };
     }
 
-    revalidatePath('/customers'); // Revalidate the orders page to refresh data
+    revalidatePath('/orders'); // Revalidate the orders page to refresh data
     return { data: { message: "Order deleted successfully." } };
 
   } catch (err) {
@@ -81,7 +87,7 @@ export async function updateOrder(orderData) {
       return { error: { message: "Failed to update order in database." } };
     }
 
-    revalidatePath('/order'); // Revalidate the orders page to refresh data
+    revalidatePath('/orders'); // Revalidate the orders page to refresh data
     return { data: { message: "Order updated successfully." } };
 
   } catch (err) {
