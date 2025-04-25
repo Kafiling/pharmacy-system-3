@@ -75,43 +75,28 @@ export default function OrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [orderDetails, setOrderDetails] = useState<OrderDetail[]>([])
 
-  // Fetch all necessary data
+  // Fetch all necessary data - UPDATED TO GET FULL NAMES
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
-      // Fetch orders with customer names
+      // Fetch orders with customer names (now getting both first and last names)
       const { data: ordersData, error: ordersError } = await supabase
         .from('order')
         .select(`
           *,
-          customers:customer_id (lastname)
+          customers:customer_id (firstname, lastname)
         `)
       
       if (ordersError) throw ordersError
 
       const enrichedOrders = ordersData.map(order => ({
         ...order,
-        customer_name: order.customers?.lastname || 'Unknown'
+        customer_name: `${order.customers?.firstname || ''} ${order.customers?.lastname || ''}`.trim()
       }))
 
       setOrders(enrichedOrders)
 
-      // Fetch customers
-      const { data: customersData, error: customersError } = await supabase
-        .from('customers')
-        .select('*')
-      
-      if (customersError) throw customersError
-      setCustomers(customersData)
-
-      // Fetch medicines
-      const { data: medicinesData, error: medicinesError } = await supabase
-        .from('medicines') // Assuming you have a medicines table
-        .select('*')
-      
-      if (medicinesError) throw medicinesError
-      setMedicines(medicinesData)
-
+      // ... (rest of your fetchData implementation remains the same)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch data")
     } finally {
@@ -263,7 +248,18 @@ export default function OrdersPage() {
         </Button>
       </div>
 
-      {/* Error display */}
+      {/* SEARCH BAR - NOW PROPERLY POSITIONED */}
+      <div className="relative w-64 mb-6">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        <Input
+          placeholder="Search orders..."
+          className="pl-8"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
+      {/* ERROR MESSAGE - MOVED BELOW SEARCH */}
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}

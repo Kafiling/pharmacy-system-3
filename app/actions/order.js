@@ -15,6 +15,7 @@ export async function getOrder() {
       employee_id,
       order_date,
       total_price,
+      status,
       customer:customer_id (
         firstname,
         lastname
