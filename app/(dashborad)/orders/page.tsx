@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -239,6 +239,22 @@ export default function OrdersPage() {
     setNewQuantity(1)
   }
 
+  // Memoized filtered orders
+
+  const filteredOrders = useMemo(() => {
+    if (!searchTerm) return orders;  // This line returns ALL orders when searchTerm is empty
+    
+    return orders.filter(order => {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        order.order_id.toLowerCase().includes(searchLower) ||
+        order.customer_name.toLowerCase().includes(searchLower) ||
+        order.status.toLowerCase().includes(searchLower) ||
+        order.total_price.toString().includes(searchTerm)
+      );
+    });
+  }, [orders, searchTerm]);
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
@@ -249,10 +265,10 @@ export default function OrdersPage() {
       </div>
 
       {/* SEARCH BAR - NOW PROPERLY POSITIONED */}
-      <div className="relative w-64 mb-6">
+      <div className="relative w-full max-w-md mb-6">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
         <Input
-          placeholder="Search orders..."
+          placeholder="Search by ID, customer, status, or amount..."
           className="pl-8"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -266,8 +282,8 @@ export default function OrdersPage() {
         </div>
       )}
 
-      {/* Orders Table */}
-      <div className="border rounded-lg">
+      {/* Orders Table - Now using filteredOrders */}
+      <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -280,44 +296,58 @@ export default function OrdersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {orders.map(order => (
-              <TableRow key={order.order_id}>
-                <TableCell>{order.order_id}</TableCell>
-                <TableCell>{order.customer_name}</TableCell>
-                <TableCell>{new Date(order.order_date).toLocaleDateString()}</TableCell>
-                <TableCell>${order.total_price.toFixed(2)}</TableCell>
-                <TableCell>
-                  <Badge variant={
-                    order.status === 'completed' ? 'default' :
-                    order.status === 'processing' ? 'secondary' :
-                    order.status === 'pending' ? 'outline' : 'destructive'
-                  }>
-                    {order.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleViewOrder(order)}>
-                        <Eye className="mr-2 h-4 w-4" /> View
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        className="text-red-600"
-                        onClick={() => handleDeleteOrder(order.order_id)}
-                      >
-                        <Trash className="mr-2 h-4 w-4" /> Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
+  {filteredOrders.length > 0 ? (
+    filteredOrders.map((order) => (
+      <TableRow key={order.order_id}>
+        <TableCell className="font-medium">{order.order_id}</TableCell>
+        <TableCell>{order.customer_name}</TableCell>
+        <TableCell>{new Date(order.order_date).toLocaleDateString()}</TableCell>
+        <TableCell>${order.total_price.toFixed(2)}</TableCell>
+        <TableCell>
+          <Badge variant={
+            order.status === 'completed' ? 'default' :
+            order.status === 'processing' ? 'secondary' :
+            order.status === 'pending' ? 'outline' : 'destructive'
+          }>
+            {order.status}
+          </Badge>
+        </TableCell>
+        <TableCell>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleViewOrder(order)}>
+                <Eye className="mr-2 h-4 w-4" /> View
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                className="text-red-600"
+                onClick={() => handleDeleteOrder(order.order_id)}
+              >
+                <Trash className="mr-2 h-4 w-4" /> Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </TableCell>
+      </TableRow>
+    ))
+  ) : (
+    <TableRow>
+      <TableCell colSpan={6} className="text-center py-8">
+        {searchTerm ? (
+          "No matching orders found"
+        ) : loading ? (
+          "Loading orders..."
+        ) : (
+          "No orders available"
+        )}
+      </TableCell>
+    </TableRow>
+  )}
+</TableBody>
         </Table>
       </div>
 
