@@ -1,41 +1,44 @@
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+import { supabase } from "@/lib/supabaseClient";
 
 export async function getOrderDetails(orderId) {
   const { data, error } = await supabase
-    .from("order_detail")
-    .select(`
+    .from("order_details")
+    .select(
+      `
+      order_detail_id,
+      order_id,
       quantity,
-      medicine_id,
+      payment,
       medicine:medicine_id (
-        name,
+        medicine_name,
         price
       )
-    `)
-    .eq("order_id", orderId); // filter by order_id
+    `
+    )
+    .eq("order_id", orderId);
 
   if (error) {
-    console.error("Error fetching order details:", error);
+    console.error("Error fetching order details:", {
+      message: error.message,
+      details: error.details,
+      code: error.code,
+    });
     return [];
   }
 
-  // Return the enriched details with medicine info
-  return data.map(detail => ({
-    medicineName: detail.medicine?.name || "Unknown", // Default in case medicine is not found
+  return data.map((detail) => ({
+    medicineName: detail.medicine?.medicine_name || "Unknown",
     quantity: detail.quantity,
     price: detail.medicine?.price || 0,
     subtotal: detail.quantity * (detail.medicine?.price || 0),
   }));
 }
 
-
 export async function addOrderDetails(orderData) {
-    const { data, error } = await supabase.from("order_details").insert([orderDetailData]);
-    console.log("Data:", data);
-    console.log("Error:", error);
-    return { data, error };
-  }
+  const { data, error } = await supabase
+    .from("order_details")
+    .insert([orderData]);
+  console.log("Data:", data);
+  console.log("Error:", error);
+  return { data, error };
+}

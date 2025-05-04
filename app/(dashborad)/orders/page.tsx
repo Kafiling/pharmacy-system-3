@@ -1,250 +1,295 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Download, Eye, MoreHorizontal, Plus, Search, Trash } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Download,
+  Eye,
+  MoreHorizontal,
+  Plus,
+  Search,
+  Trash,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { getOrdersWithDetails } from "@/app/actions/orderService";
 
-type OrderStatus = "completed" | "processing" | "pending" | "cancelled"
+type OrderStatus = "completed" | "processing" | "pending" | "cancelled";
 
 interface Order {
-  order_id: string
-  customer_id: string
-  employee_id: string
-  order_date: string
-  total_price: number
-  status: OrderStatus
-  customer_name?: string
+  order_id: string;
+  customer_id: string;
+  employee_id: string;
+  order_date: string;
+  total_price: number;
+  status: OrderStatus;
+  customer_name?: string;
 }
 
 interface OrderDetail {
-  order_detail_id: string
-  order_id: string
-  medicine_id: string
-  quantity: number
-  payment: string
-  medicine_name?: string
-  medicine_price?: number
+  order_detail_id: string;
+  order_id: string;
+  medicine_id: string;
+  quantity: number;
+  payment: string;
+  medicine_name?: string;
+  medicine_price?: number;
 }
 
 interface Customer {
-  customer_id: string
-  lastname: string
-  phone: string
-  email: string
-  address: string
+  customer_id: string;
+  firstname: string;
+  lastname: string;
+  phone: string;
+  email: string;
+  address: string;
 }
 
 interface Medicine {
-  medicine_id: string
-  name: string
-  price: number
+  medicine_id: string;
+  name: string;
+  price: number;
 }
 
 export default function OrdersPage() {
-  const supabase = createClientComponentClient()
-  const [orders, setOrders] = useState<Order[]>([])
-  const [customers, setCustomers] = useState<Customer[]>([])
-  const [medicines, setMedicines] = useState<Medicine[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string>("")
-  const [searchTerm, setSearchTerm] = useState("")
-  
+  const supabase = createClientComponentClient();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [medicines, setMedicines] = useState<Medicine[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState("");
+
   // Order creation state
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [selectedCustomerId, setSelectedCustomerId] = useState("")
-  const [paymentMethod, setPaymentMethod] = useState("cash")
-  const [orderItems, setOrderItems] = useState<{
-    medicine_id: string
-    quantity: number
-    price: number
-    name: string
-  }[]>([])
-  const [newMedicineId, setNewMedicineId] = useState("")
-  const [newQuantity, setNewQuantity] = useState(1)
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [orderItems, setOrderItems] = useState<
+    {
+      medicine_id: string;
+      quantity: number;
+      price: number;
+      name: string;
+    }[]
+  >([]);
+  const [newMedicineId, setNewMedicineId] = useState("");
+  const [newQuantity, setNewQuantity] = useState(1);
 
   // View order state
-  const [viewDialogOpen, setViewDialogOpen] = useState(false)
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
-  const [orderDetails, setOrderDetails] = useState<OrderDetail[]>([])
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [orderDetails, setOrderDetails] = useState<OrderDetail[]>([]);
 
   // Fetch all necessary data - UPDATED TO GET FULL NAMES
   const fetchData = useCallback(async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      // Fetch orders with customer names (now getting both first and last names)
-      const { data: ordersData, error: ordersError } = await supabase
-        .from('order')
-        .select(`
-          *,
-          customers:customer_id (firstname, lastname)
-        `)
-      
-      if (ordersError) throw ordersError
+      const enrichedOrders = await getOrdersWithDetails();
+      setOrders(enrichedOrders);
+      console.log("Fetched orders:", enrichedOrders);
 
-      const enrichedOrders = ordersData.map(order => ({
-        ...order,
-        customer_name: `${order.customers?.firstname || ''} ${order.customers?.lastname || ''}`.trim()
-      }))
+      const { data: customerData, error: customerErr } = await supabase
+        .from("customers")
+        .select("*");
+      if (customerErr) throw customerErr;
+      setCustomers(customerData || []);
 
-      setOrders(enrichedOrders)
-
-      // ... (rest of your fetchData implementation remains the same)
+      const { data: medicineData, error: medicineErr } = await supabase
+        .from("medicine")
+        .select("*");
+      if (medicineErr) throw medicineErr;
+      setMedicines(medicineData || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch data")
+      setError(err instanceof Error ? err.message : "Failed to fetch data");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [supabase])
+  }, []);
 
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    fetchData();
+  }, [fetchData]);
 
   // Create new order
   const handleCreateOrder = async () => {
     if (!selectedCustomerId || orderItems.length === 0) {
-      setError("Please select a customer and add at least one item")
-      return
+      setError("Please select a customer and add at least one item");
+      return;
     }
 
     try {
       // Get current user (employee)
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error("User not authenticated")
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
 
       // Calculate total price
-      const total_price = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+      const total_price = orderItems.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      );
 
       // Create order
       const { data: order, error: orderError } = await supabase
-        .from('order')
-        .insert([{
-          customer_id: selectedCustomerId,
-          employee_id: user.id,
-          order_date: new Date().toISOString(),
-          total_price,
-          status: 'pending'
-        }])
+        .from("order")
+        .insert([
+          {
+            customer_id: selectedCustomerId,
+            employee_id: user.id,
+            order_date: new Date().toISOString(),
+            total_price,
+            status: "pending",
+          },
+        ])
         .select()
-        .single()
+        .single();
 
-      if (orderError) throw orderError
+      if (orderError) throw orderError;
 
       // Create order details
-      const orderDetails = orderItems.map(item => ({
+      const orderDetails = orderItems.map((item) => ({
         order_id: order.order_id,
         medicine_id: item.medicine_id,
         quantity: item.quantity,
-        payment: paymentMethod
-      }))
+        payment: paymentMethod,
+      }));
 
       const { error: detailsError } = await supabase
-        .from('order_details')
-        .insert(orderDetails)
+        .from("order_details")
+        .insert(orderDetails);
 
-      if (detailsError) throw detailsError
+      if (detailsError) throw detailsError;
 
       // Refresh data and close dialog
-      await fetchData()
-      setDialogOpen(false)
-      resetOrderForm()
+      await fetchData();
+      setDialogOpen(false);
+      resetOrderForm();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create order")
+      setError(err instanceof Error ? err.message : "Failed to create order");
     }
-  }
+  };
 
   // View order details
   const handleViewOrder = async (order: Order) => {
     try {
       const { data, error } = await supabase
-        .from('order_details')
-        .select(`
+        .from("order_details")
+        .select(
+          `
           *,
           medicines:medicine_id (name, price)
-        `)
-        .eq('order_id', order.order_id)
+        `
+        )
+        .eq("order_id", order.order_id);
 
-      if (error) throw error
+      if (error) throw error;
 
-      const enrichedDetails = data.map(detail => ({
+      const enrichedDetails = data.map((detail) => ({
         ...detail,
-        medicine_name: detail.medicines?.name || 'Unknown',
-        medicine_price: detail.medicines?.price || 0
-      }))
+        medicine_name: detail.medicines?.name || "Unknown",
+        medicine_price: detail.medicines?.price || 0,
+      }));
 
-      setSelectedOrder(order)
-      setOrderDetails(enrichedDetails)
-      setViewDialogOpen(true)
+      setSelectedOrder(order);
+      setOrderDetails(enrichedDetails);
+      setViewDialogOpen(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch order details")
+      setError(
+        err instanceof Error ? err.message : "Failed to fetch order details"
+      );
     }
-  }
+  };
 
   // Delete order
   const handleDeleteOrder = async (orderId: string) => {
     try {
       // First delete order details to maintain referential integrity
       const { error: detailsError } = await supabase
-        .from('order_details')
+        .from("order_details")
         .delete()
-        .eq('order_id', orderId)
+        .eq("order_id", orderId);
 
-      if (detailsError) throw detailsError
+      if (detailsError) throw detailsError;
 
       // Then delete the order
       const { error: orderError } = await supabase
-        .from('order')
+        .from("order")
         .delete()
-        .eq('order_id', orderId)
+        .eq("order_id", orderId);
 
-      if (orderError) throw orderError
+      if (orderError) throw orderError;
 
-      await fetchData()
+      await fetchData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete order")
+      setError(err instanceof Error ? err.message : "Failed to delete order");
     }
-  }
+  };
 
   const resetOrderForm = () => {
-    setSelectedCustomerId("")
-    setPaymentMethod("cash")
-    setOrderItems([])
-    setNewMedicineId("")
-    setNewQuantity(1)
-  }
+    setSelectedCustomerId("");
+    setPaymentMethod("cash");
+    setOrderItems([]);
+    setNewMedicineId("");
+    setNewQuantity(1);
+  };
 
   const addItemToOrder = () => {
-    const medicine = medicines.find(m => m.medicine_id === newMedicineId)
+    const medicine = medicines.find((m) => m.medicine_id === newMedicineId);
     if (!medicine) {
-      setError("Please select a valid medicine")
-      return
+      setError("Please select a valid medicine");
+      return;
     }
 
-    setOrderItems([...orderItems, {
-      medicine_id: newMedicineId,
-      name: medicine.name,
-      price: medicine.price,
-      quantity: newQuantity
-    }])
+    setOrderItems([
+      ...orderItems,
+      {
+        medicine_id: newMedicineId,
+        name: medicine.name,
+        price: medicine.price,
+        quantity: newQuantity,
+      },
+    ]);
 
-    setNewMedicineId("")
-    setNewQuantity(1)
-  }
+    setNewMedicineId("");
+    setNewQuantity(1);
+  };
 
   // Memoized filtered orders
 
   const filteredOrders = useMemo(() => {
-    if (!searchTerm) return orders;  // This line returns ALL orders when searchTerm is empty
-    
-    return orders.filter(order => {
+    if (!searchTerm) return orders; // This line returns ALL orders when searchTerm is empty
+
+    return orders.filter((order) => {
       const searchLower = searchTerm.toLowerCase();
       return (
         order.order_id.toLowerCase().includes(searchLower) ||
@@ -296,58 +341,68 @@ export default function OrdersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-  {filteredOrders.length > 0 ? (
-    filteredOrders.map((order) => (
-      <TableRow key={order.order_id}>
-        <TableCell className="font-medium">{order.order_id}</TableCell>
-        <TableCell>{order.customer_name}</TableCell>
-        <TableCell>{new Date(order.order_date).toLocaleDateString()}</TableCell>
-        <TableCell>${order.total_price.toFixed(2)}</TableCell>
-        <TableCell>
-          <Badge variant={
-            order.status === 'completed' ? 'default' :
-            order.status === 'processing' ? 'secondary' :
-            order.status === 'pending' ? 'outline' : 'destructive'
-          }>
-            {order.status}
-          </Badge>
-        </TableCell>
-        <TableCell>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => handleViewOrder(order)}>
-                <Eye className="mr-2 h-4 w-4" /> View
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                className="text-red-600"
-                onClick={() => handleDeleteOrder(order.order_id)}
-              >
-                <Trash className="mr-2 h-4 w-4" /> Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </TableCell>
-      </TableRow>
-    ))
-  ) : (
-    <TableRow>
-      <TableCell colSpan={6} className="text-center py-8">
-        {searchTerm ? (
-          "No matching orders found"
-        ) : loading ? (
-          "Loading orders..."
-        ) : (
-          "No orders available"
-        )}
-      </TableCell>
-    </TableRow>
-  )}
-</TableBody>
+            {filteredOrders.length > 0 ? (
+              filteredOrders.map((order) => (
+                <TableRow key={order.order_id}>
+                  <TableCell className="font-medium">
+                    {order.order_id}
+                  </TableCell>
+                  <TableCell>{order.customer_name}</TableCell>
+                  <TableCell>
+                    {new Date(order.order_date).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>${order.total_price.toFixed(2)}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        order.status === "completed"
+                          ? "default"
+                          : order.status === "processing"
+                          ? "secondary"
+                          : order.status === "pending"
+                          ? "outline"
+                          : "destructive"
+                      }
+                    >
+                      {order.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() => handleViewOrder(order)}
+                        >
+                          <Eye className="mr-2 h-4 w-4" /> View
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => handleDeleteOrder(order.order_id)}
+                        >
+                          <Trash className="mr-2 h-4 w-4" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-8">
+                  {searchTerm
+                    ? "No matching orders found"
+                    : loading
+                    ? "Loading orders..."
+                    : "No orders available"}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
         </Table>
       </div>
 
@@ -360,14 +415,21 @@ export default function OrdersPage() {
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label>Customer *</Label>
-              <Select value={selectedCustomerId} onValueChange={setSelectedCustomerId}>
+              <Select
+                value={selectedCustomerId}
+                onValueChange={setSelectedCustomerId}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select customer" />
                 </SelectTrigger>
                 <SelectContent>
-                  {customers.map(customer => (
-                    <SelectItem key={customer.customer_id} value={customer.customer_id}>
-                      {customer.lastname} ({customer.email})
+                  {customers.map((customer) => (
+                    <SelectItem
+                      key={customer.customer_id}
+                      value={customer.customer_id}
+                    >
+                      {customer.firstname} {customer.lastname} ({customer.email}
+                      )
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -392,21 +454,31 @@ export default function OrdersPage() {
               <Label>Order Items *</Label>
               <div className="border rounded-md p-4">
                 {orderItems.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No items added yet</p>
+                  <p className="text-sm text-muted-foreground">
+                    No items added yet
+                  </p>
                 ) : (
                   <div className="space-y-2">
                     {orderItems.map((item, index) => (
-                      <div key={index} className="flex justify-between items-center p-2 border rounded">
+                      <div
+                        key={index}
+                        className="flex justify-between items-center p-2 border rounded"
+                      >
                         <div>
                           <p className="font-medium">{item.name}</p>
                           <p className="text-sm text-muted-foreground">
-                            {item.quantity} × ${item.price.toFixed(2)} = ${(item.quantity * item.price).toFixed(2)}
+                            {item.quantity} × ${item.price.toFixed(2)} = $
+                            {(item.quantity * item.price).toFixed(2)}
                           </p>
                         </div>
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => setOrderItems(orderItems.filter((_, i) => i !== index))}
+                          onClick={() =>
+                            setOrderItems(
+                              orderItems.filter((_, i) => i !== index)
+                            )
+                          }
                         >
                           <Trash className="h-4 w-4 text-red-500" />
                         </Button>
@@ -418,14 +490,21 @@ export default function OrdersPage() {
                 <div className="mt-4 grid grid-cols-3 gap-2">
                   <div className="space-y-1">
                     <Label>Medicine</Label>
-                    <Select value={newMedicineId} onValueChange={setNewMedicineId}>
+                    <Select
+                      value={newMedicineId}
+                      onValueChange={setNewMedicineId}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select medicine" />
                       </SelectTrigger>
                       <SelectContent>
-                        {medicines.map(medicine => (
-                          <SelectItem key={medicine.medicine_id} value={medicine.medicine_id}>
-                            {medicine.name} (${medicine.price.toFixed(2)})
+                        {medicines.map((medicine) => (
+                          <SelectItem
+                            key={medicine.medicine_id}
+                            value={medicine.medicine_id}
+                          >
+                            {medicine.medicine_name} ($
+                            {medicine.price.toFixed(2)})
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -450,10 +529,13 @@ export default function OrdersPage() {
             </div>
           </div>
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => {
-              setDialogOpen(false)
-              resetOrderForm()
-            }}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDialogOpen(false);
+                resetOrderForm();
+              }}
+            >
               Cancel
             </Button>
             <Button onClick={handleCreateOrder}>Create Order</Button>
@@ -473,14 +555,25 @@ export default function OrdersPage() {
                 <div>
                   <h3 className="font-medium">Order Information</h3>
                   <p>ID: {selectedOrder.order_id}</p>
-                  <p>Date: {new Date(selectedOrder.order_date).toLocaleString()}</p>
-                  <p>Status: <Badge variant={
-                    selectedOrder.status === 'completed' ? 'default' :
-                    selectedOrder.status === 'processing' ? 'secondary' :
-                    selectedOrder.status === 'pending' ? 'outline' : 'destructive'
-                  }>
-                    {selectedOrder.status}
-                  </Badge></p>
+                  <p>
+                    Date: {new Date(selectedOrder.order_date).toLocaleString()}
+                  </p>
+                  <p>
+                    Status:{" "}
+                    <Badge
+                      variant={
+                        selectedOrder.status === "completed"
+                          ? "default"
+                          : selectedOrder.status === "processing"
+                          ? "secondary"
+                          : selectedOrder.status === "pending"
+                          ? "outline"
+                          : "destructive"
+                      }
+                    >
+                      {selectedOrder.status}
+                    </Badge>
+                  </p>
                 </div>
                 <div>
                   <h3 className="font-medium">Customer</h3>
@@ -501,13 +594,20 @@ export default function OrdersPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {orderDetails.map(detail => (
+                      {orderDetails.map((detail) => (
                         <TableRow key={detail.order_detail_id}>
                           <TableCell>{detail.medicine_name}</TableCell>
-                          <TableCell className="text-right">{detail.quantity}</TableCell>
-                          <TableCell className="text-right">${detail.medicine_price?.toFixed(2)}</TableCell>
                           <TableCell className="text-right">
-                            ${((detail.medicine_price || 0) * detail.quantity).toFixed(2)}
+                            {detail.quantity}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            ${detail.medicine_price?.toFixed(2)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            $
+                            {(
+                              (detail.medicine_price || 0) * detail.quantity
+                            ).toFixed(2)}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -519,7 +619,10 @@ export default function OrdersPage() {
               <div className="flex justify-between border-t pt-4">
                 <div>
                   <p className="text-sm text-muted-foreground">
-                    Payment Method: <span className="capitalize">{orderDetails[0]?.payment}</span>
+                    Payment Method:{" "}
+                    <span className="capitalize">
+                      {orderDetails[0]?.payment}
+                    </span>
                   </p>
                 </div>
                 <div className="text-right">
@@ -533,5 +636,5 @@ export default function OrdersPage() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
