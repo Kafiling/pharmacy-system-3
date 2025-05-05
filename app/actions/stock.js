@@ -7,6 +7,7 @@ const supabase = createClient(
 
 export async function getAllStock() {
 
+
   const { data, error } = await supabase.from("stock").select(
     `
     stock_id,
