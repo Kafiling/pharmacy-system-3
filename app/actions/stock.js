@@ -27,7 +27,6 @@ export async function getAllStock() {
   `
   );
 
-ฃ
   console.log("Data:", data);
   console.log("Error:", error);
   return data;
