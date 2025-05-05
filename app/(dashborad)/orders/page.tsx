@@ -75,6 +75,7 @@ interface Customer {
 }
 
 interface Medicine {
+  medicine_name: string;
   medicine_id: string;
   name: string;
   price: number;
@@ -274,7 +275,7 @@ export default function OrdersPage() {
       ...orderItems,
       {
         medicine_id: newMedicineId,
-        name: medicine.name,
+        name: medicine.medicine_name,
         price: medicine.price,
         quantity: newQuantity,
       },
@@ -282,6 +283,7 @@ export default function OrdersPage() {
 
     setNewMedicineId("");
     setNewQuantity(1);
+    console.log(medicine);
   };
 
   // Memoized filtered orders
@@ -299,6 +301,8 @@ export default function OrdersPage() {
       );
     });
   }, [orders, searchTerm]);
+
+  filteredOrders.sort((a, b) => b.order_id.localeCompare(a.order_id));
 
   return (
     <div className="container mx-auto py-8">
@@ -336,7 +340,7 @@ export default function OrdersPage() {
               <TableHead>Customer</TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Total</TableHead>
-              <TableHead>Status</TableHead>
+
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -351,22 +355,8 @@ export default function OrdersPage() {
                   <TableCell>
                     {new Date(order.order_date).toLocaleDateString()}
                   </TableCell>
-                  <TableCell>${order.total_price.toFixed(2)}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        order.status === "completed"
-                          ? "default"
-                          : order.status === "processing"
-                          ? "secondary"
-                          : order.status === "pending"
-                          ? "outline"
-                          : "destructive"
-                      }
-                    >
-                      {order.status}
-                    </Badge>
-                  </TableCell>
+                  <TableCell>THB {order.total_price.toFixed(2)}</TableCell>
+
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -428,24 +418,10 @@ export default function OrdersPage() {
                       key={customer.customer_id}
                       value={customer.customer_id}
                     >
-                      {customer.firstname} {customer.lastname} ({customer.email}
-                      )
+                      {customer.firstname} {customer.lastname} (ID :
+                      {customer.customer_id})
                     </SelectItem>
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid gap-2">
-              <Label>Payment Method *</Label>
-              <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select payment method" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="cash">Cash</SelectItem>
-                  <SelectItem value="credit_card">Credit Card</SelectItem>
-                  <SelectItem value="insurance">Insurance</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -467,7 +443,7 @@ export default function OrdersPage() {
                         <div>
                           <p className="font-medium">{item.name}</p>
                           <p className="text-sm text-muted-foreground">
-                            {item.quantity} × ${item.price.toFixed(2)} = $
+                            {item.quantity} × THB {item.price.toFixed(2)} = THB
                             {(item.quantity * item.price).toFixed(2)}
                           </p>
                         </div>
@@ -503,7 +479,7 @@ export default function OrdersPage() {
                             key={medicine.medicine_id}
                             value={medicine.medicine_id}
                           >
-                            {medicine.medicine_name} ($
+                            {medicine.medicine_name} (THB
                             {medicine.price.toFixed(2)})
                           </SelectItem>
                         ))}
@@ -601,10 +577,10 @@ export default function OrdersPage() {
                             {detail.quantity}
                           </TableCell>
                           <TableCell className="text-right">
-                            ${detail.medicine_price?.toFixed(2)}
+                            THB {detail.medicine_price?.toFixed(2)}
                           </TableCell>
                           <TableCell className="text-right">
-                            $
+                            THB
                             {(
                               (detail.medicine_price || 0) * detail.quantity
                             ).toFixed(2)}
@@ -627,7 +603,7 @@ export default function OrdersPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-lg font-bold">
-                    Total: ${selectedOrder.total_price.toFixed(2)}
+                    Total: THB {selectedOrder.total_price.toFixed(2)}
                   </p>
                 </div>
               </div>
